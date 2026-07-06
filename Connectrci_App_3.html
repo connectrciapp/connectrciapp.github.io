@@ -1,0 +1,2538 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONNECT.RCI - Plateforme Call Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-page: #f0f5fa;
+            --bg-surface: #ffffff;
+            --bg-surface-alt: #f8fafc;
+            --text-primary: #1e4663;
+            --text-secondary: #444;
+            --text-muted: #8899aa;
+            --border-color: #eef2f8;
+            --border-color-strong: #e2edf7;
+            --input-border: #cbdde9;
+            --input-bg: #ffffff;
+            --table-header-bg: #f8fafc;
+            --popup-overlay: rgba(0,0,0,0.5);
+            --shadow-color: rgba(0,0,0,0.10);
+            --guide-bg: #eef2ff;
+            --biblio-bg: #f9fafc;
+        }
+        html[data-theme="dark"] {
+            --bg-page: #101720;
+            --bg-surface: #182130;
+            --bg-surface-alt: #202b3b;
+            --text-primary: #eaf0f6;
+            --text-secondary: #cdd7e1;
+            --text-muted: #92a3b5;
+            --border-color: #2a3646;
+            --border-color-strong: #33414f;
+            --input-border: #3c4b5c;
+            --input-bg: #202b3b;
+            --table-header-bg: #202b3b;
+            --popup-overlay: rgba(0,0,0,0.75);
+            --shadow-color: rgba(0,0,0,0.45);
+            --guide-bg: #22304a;
+            --biblio-bg: #1c2734;
+        }
+        html, body { height: auto; }
+        body {
+            background: var(--bg-page);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            padding: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg-surface);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -8px var(--shadow-color);
+            overflow: hidden;
+            transform-origin: top center;
+        }
+        .header {
+            background: #e8692c;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid #0d7a5f;
+        }
+        .logo-text h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+        .logo-text p {
+            color: #fff;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
+        .user-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 14px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 500;
+            font-size: 12px;
+        }
+        .nav-bar {
+            background: var(--bg-surface);
+            padding: 0 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            border-bottom: 1px solid var(--border-color-strong);
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-left { display: flex; gap: 4px; align-items: center; }
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-btn:hover { background: var(--bg-surface-alt); }
+        .nav-btn.active { background: #e8692c; color: white; }
+        #logoutBtn {
+            background: transparent;
+            color: #d16344;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #logoutBtn:hover { background: var(--bg-surface-alt); }
+        .main-content { padding: 16px 20px; min-height: 400px; }
+        .card {
+            background: var(--bg-surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 10px var(--shadow-color);
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        .card h3, .card h4, .card h5 { color: var(--text-primary); }
+        .grid-2cols {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+            gap: 14px;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .dash-tile {
+            background: var(--bg-surface);
+            border-radius: 16px;
+            padding: 18px 14px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .dash-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(232, 105, 44, 0.12);
+            border-color: #e8692c;
+        }
+        .dash-tile i {
+            font-size: 32px;
+            color: #e8692c;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .dash-tile .tile-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .dash-tile .tile-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .dash-tile.admin-tile {
+            border-left: 3px solid #e8692c;
+        }
+        .dash-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-item {
+            background: var(--bg-surface-alt);
+            border-radius: 12px;
+            padding: 12px 14px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .stat-item .stat-number {
+            font-size: 22px;
+            font-weight: 700;
+            color: #e8692c;
+        }
+        .stat-item .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+            font-size: 12px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 14px;
+            font-size: 12px;
+            background: var(--input-bg);
+            color: var(--text-secondary);
+        }
+        input[list] { background: var(--input-bg); }
+        button {
+            background: #e8692c;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        button.secondary { background: #0d7a5f; }
+        button.danger { background: #b33c1a; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .badge { background: var(--guide-bg); color: var(--text-primary); padding: 3px 10px; border-radius: 30px; font-size: 11px; }
+        hr { margin: 12px 0; border: 0; height: 1px; background: var(--border-color-strong); }
+        .eval-section-card {
+            background: var(--bg-surface-alt);
+            border-radius: 14px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .eval-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 4px; }
+        .eval-header strong { font-size: 13px; color: var(--text-primary); }
+        .eval-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-style: italic; }
+        .eval-select-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .result-option {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--bg-surface-alt);
+            padding: 4px 10px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .result-option input { width: auto; margin: 0; accent-color: #e8692c; }
+        .popup-modal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: var(--popup-overlay);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+        .popup-card {
+            background: var(--bg-surface);
+            max-width: 700px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 24px;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+        .popup-card h2 { font-size: 18px; margin-bottom: 12px; color: #e8692c; }
+        .dynamic-list-item { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+        .bibliotheque-script { background: var(--biblio-bg); border-left: 4px solid #e8692c; padding: 12px; margin: 12px 0; border-radius: 12px; font-size: 12px; }
+        .guide-step { background: var(--guide-bg); color: var(--text-secondary); padding: 8px 12px; border-radius: 10px; margin: 6px 0; font-size: 12px; }
+        input[readonly] { background-color: var(--bg-surface-alt); cursor: default; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; table-layout: fixed; }
+        th, td { border-bottom: 1px solid var(--border-color-strong); padding: 6px 8px; text-align: left; font-size: 12px; }
+        th { background: var(--table-header-bg); font-weight: 600; color: #e8692c; white-space: nowrap; }
+        /* Historiques : le texte long ne doit ni agrandir la ligne ni décaler les colonnes -> scroll interne à la cellule */
+        td {
+            max-width: 220px;
+            white-space: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+        }
+        .table-responsive { overflow-x: auto; }
+        .matrix-table { border-collapse: collapse; width: 100%; font-size: 12px; table-layout: auto; }
+        .matrix-table th, .matrix-table td { border: 1px solid var(--border-color-strong); padding: 6px; text-align: center; max-width: none; white-space: normal; overflow: visible; }
+        .matrix-table th { background-color: #e8692c; color: white; }
+        .assign-check { transform: scale(1.1); cursor: pointer; }
+        .close-popup {
+            float: right;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 22px;
+            padding: 0 8px;
+            border: none;
+        }
+        .close-popup:hover { color: #e8692c; }
+        .eval-table-ok { color: #0d7a5f; font-weight: 600; }
+        .eval-table-ko { color: #e8692c; font-weight: 600; }
+        .eval-table-na { color: var(--text-muted); font-weight: 400; }
+        .delete-option { margin: 8px 0; padding: 10px; background: var(--guide-bg); border-radius: 12px; border-left: 4px solid #e8692c; }
+        .agent-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border-color); }
+        .agent-item:last-child { border-bottom: none; }
+        .access-denied { color: #b33c1a; font-weight: 500; padding: 20px; text-align: center; }
+
+        /* ----- Graphes du Bilan : taille "moyenne" homogène ----- */
+        .chart-box { position: relative; width: 100%; max-width: 460px; height: 250px; margin: 8px auto; }
+        .chart-box canvas { width: 100% !important; height: 100% !important; }
+        .bilan-chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); gap: 20px; }
+
+        /* ----- Contrôle de taille d'affichage + thème (flottant, toujours visible) ----- */
+        #uiPrefsControl {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 30px; padding: 4px 6px;
+            font-size: 12px; color: white;
+        }
+        #uiPrefsControl button {
+            background: rgba(255,255,255,0.9); color: #1e4663;
+            width: 24px; height: 24px; padding: 0; border-radius: 50%;
+            font-size: 13px; font-weight: 700; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #uiPrefsControl button:hover { background: #1e4663; color: white; }
+        #uiScaleLabel { min-width: 32px; text-align: center; font-weight: 600; color: white; }
+        #themeToggleBtn { border-radius: 50%; width: 24px; height: 24px; padding: 0; display:flex; align-items:center; justify-content:center; font-size: 12px; }
+        .login-prefs-bar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+        .login-prefs-bar #uiPrefsControl { background: var(--bg-surface-alt); border-color: var(--border-color-strong); }
+        .login-prefs-bar #uiPrefsControl button { background: var(--bg-surface); color: var(--text-primary); }
+        .login-prefs-bar #uiScaleLabel { color: var(--text-primary); }
+        @media (max-width:700px){ .main-content { padding: 10px; } }
+    </style>
+</head>
+<body>
+<div id="appRoot"><div style="text-align:center; margin-top:40px; color:#e8692c;"><i class="fas fa-spinner fa-pulse fa-2x"></i><br/>Chargement...</div></div>
+<script>
+(function() {
+    // ----- STORAGE KEYS -----
+    const STORAGE = {
+        users: 'crc_users',
+        campaigns: 'crc_campaigns',
+        one2one: 'crc_one2one',
+        evaluations: 'crc_evaluations',
+        assignments: 'crc_assignments',
+        settings: 'crc_settings',
+        documents: 'crc_documents',
+        agents: 'crc_agents',
+        attestations: 'crc_attestations',
+        coachings: 'crc_coachings'
+    };
+
+    // ----- PRÉFÉRENCES D'AFFICHAGE : taille de zoom & thème (valables sur toutes les pages, pour tout utilisateur) -----
+    const UI_SCALE_KEY = 'crc_ui_scale';
+    const UI_THEME_KEY = 'crc_theme';
+    let uiScale = parseInt(localStorage.getItem(UI_SCALE_KEY), 10) || 100;
+    let uiTheme = localStorage.getItem(UI_THEME_KEY) || 'light';
+
+    function uiPrefsControlHtml() {
+        return `<div id="uiPrefsControl">
+            <button type="button" id="zoomOutBtn" title="Réduire la taille d'affichage">−</button>
+            <span id="uiScaleLabel">${uiScale}%</span>
+            <button type="button" id="zoomInBtn" title="Augmenter la taille d'affichage">+</button>
+            <button type="button" id="themeToggleBtn" title="Changer de thème">${uiTheme === 'dark' ? '☀️' : '🌙'}</button>
+        </div>`;
+    }
+
+    function applyUiScale() {
+        const rootEl = document.getElementById('appRoot');
+        if (rootEl) rootEl.style.zoom = (uiScale / 100);
+        const label = document.getElementById('uiScaleLabel');
+        if (label) label.textContent = uiScale + '%';
+    }
+    function applyUiTheme() {
+        document.documentElement.setAttribute('data-theme', uiTheme);
+        const themeBtn = document.getElementById('themeToggleBtn');
+        if (themeBtn) themeBtn.textContent = uiTheme === 'dark' ? '☀️' : '🌙';
+    }
+    // Rebranche les boutons du contrôle zoom/thème : à appeler après chaque (re)rendu, le contrôle étant
+    // intégré à l'en-tête (ou à l'écran de connexion), il est régénéré à chaque fois.
+    function attachUiPrefsControl() {
+        applyUiScale();
+        applyUiTheme();
+        const zoomIn = document.getElementById('zoomInBtn');
+        const zoomOut = document.getElementById('zoomOutBtn');
+        const themeBtn = document.getElementById('themeToggleBtn');
+        if (zoomIn) zoomIn.onclick = function() {
+            uiScale = Math.min(160, uiScale + 10);
+            localStorage.setItem(UI_SCALE_KEY, uiScale);
+            applyUiScale();
+        };
+        if (zoomOut) zoomOut.onclick = function() {
+            uiScale = Math.max(70, uiScale - 10);
+            localStorage.setItem(UI_SCALE_KEY, uiScale);
+            applyUiScale();
+        };
+        if (themeBtn) themeBtn.onclick = function() {
+            uiTheme = uiTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem(UI_THEME_KEY, uiTheme);
+            applyUiTheme();
+        };
+    }
+    applyUiTheme();
+
+    function initData() {
+        let users = localStorage.getItem(STORAGE.users);
+        if (!users) {
+            users = [
+                { id: 'u1', username: 'Admin', password: 'Admin', role: 'admin', fullName: 'Admin' },
+                { id: 'u2', username: 'SophieL', password: 'sophie123', role: 'manager', fullName: 'Sophie Laurent' },
+                { id: 'u3', username: 'MarcD', password: 'marc123', role: 'manager', fullName: 'Marc Denfer' }
+            ];
+            localStorage.setItem(STORAGE.users, JSON.stringify(users));
+        } else {
+            try {
+                let parsed = JSON.parse(users);
+                if (!Array.isArray(parsed) || parsed.length === 0) throw new Error();
+                for (let u of parsed) if (!u.id || !u.username || !u.password || !u.role || !u.fullName) throw new Error();
+                // Migration : l'ancien rôle "user" devient "manager"
+                let changed = false;
+                for (let u of parsed) if (u.role === 'user') { u.role = 'manager'; changed = true; }
+                if (changed) localStorage.setItem(STORAGE.users, JSON.stringify(parsed));
+            } catch(e) {
+                users = [
+                    { id: 'u1', username: 'Admin', password: 'Admin', role: 'admin', fullName: 'Admin' },
+                    { id: 'u2', username: 'SophieL', password: 'sophie123', role: 'manager', fullName: 'Sophie Laurent' },
+                    { id: 'u3', username: 'MarcD', password: 'marc123', role: 'manager', fullName: 'Marc Denfer' }
+                ];
+                localStorage.setItem(STORAGE.users, JSON.stringify(users));
+            }
+        }
+        if (!localStorage.getItem(STORAGE.campaigns)) {
+            localStorage.setItem(STORAGE.campaigns, JSON.stringify([
+                { id: 'camp1', name: 'UNADEV PRP', type: 'PRP' },
+                { id: 'camp2', name: 'UNADEV PPA', type: 'PPA' },
+                { id: 'camp3', name: 'UNICEF PPA', type: 'PPA' },
+                { id: 'camp4', name: 'IPC', type: 'PRP' }
+            ]));
+        }
+        // ----- Migration / initialisation des Objectifs (modèle par indicateur) -----
+        let settingsRaw = localStorage.getItem(STORAGE.settings);
+        if (!settingsRaw) {
+            localStorage.setItem(STORAGE.settings, JSON.stringify({
+                indicators: [
+                    { id: 'ind_cu', key: 'cuPerHour', name: 'CU/H', type: 'quantity', target: 8, builtin: true },
+                    { id: 'ind_prom', key: 'promesseRate', name: 'Promesse/CU', type: 'percentage', target: 4.0, builtin: true },
+                    { id: 'ind_del', key: 'delRate', name: 'DEL/CU', type: 'percentage', target: 1.2, builtin: true },
+                    { id: 'ind_pel', key: 'pelRate', name: 'PEL/CU', type: 'percentage', target: 4.0, builtin: true }
+                ]
+            }));
+        } else {
+            try {
+                let s = JSON.parse(settingsRaw);
+                if (!Array.isArray(s.indicators)) {
+                    // Ancien format -> migration vers le nouveau modèle par indicateur
+                    let indicators = [
+                        { id: 'ind_cu', key: 'cuPerHour', name: 'CU/H', type: 'quantity', target: s.cuPerHourTarget || 8, builtin: true },
+                        { id: 'ind_prom', key: 'promesseRate', name: 'Promesse/CU', type: 'percentage', target: s.promesseRate || 4.0, builtin: true },
+                        { id: 'ind_del', key: 'delRate', name: 'DEL/CU', type: 'percentage', target: s.delRate || 1.2, builtin: true },
+                        { id: 'ind_pel', key: 'pelRate', name: 'PEL/CU', type: 'percentage', target: s.pelRate || 4.0, builtin: true }
+                    ];
+                    if (Array.isArray(s.customIndicators)) {
+                        for (let i=0; i<s.customIndicators.length; i++) {
+                            indicators.push({ id: 'ind_custom_'+Date.now()+'_'+i, key: null, name: s.customIndicators[i].name, type: 'quantity', target: s.customIndicators[i].target || 0, builtin: false });
+                        }
+                    }
+                    localStorage.setItem(STORAGE.settings, JSON.stringify({ indicators }));
+                }
+            } catch(e) {
+                localStorage.setItem(STORAGE.settings, JSON.stringify({
+                    indicators: [
+                        { id: 'ind_cu', key: 'cuPerHour', name: 'CU/H', type: 'quantity', target: 8, builtin: true },
+                        { id: 'ind_prom', key: 'promesseRate', name: 'Promesse/CU', type: 'percentage', target: 4.0, builtin: true },
+                        { id: 'ind_del', key: 'delRate', name: 'DEL/CU', type: 'percentage', target: 1.2, builtin: true },
+                        { id: 'ind_pel', key: 'pelRate', name: 'PEL/CU', type: 'percentage', target: 4.0, builtin: true }
+                    ]
+                }));
+            }
+        }
+        if (!localStorage.getItem(STORAGE.one2one)) localStorage.setItem(STORAGE.one2one, JSON.stringify([]));
+        if (!localStorage.getItem(STORAGE.evaluations)) localStorage.setItem(STORAGE.evaluations, JSON.stringify([]));
+        if (!localStorage.getItem(STORAGE.attestations)) localStorage.setItem(STORAGE.attestations, JSON.stringify([]));
+        if (!localStorage.getItem(STORAGE.coachings)) localStorage.setItem(STORAGE.coachings, JSON.stringify([]));
+        if (!localStorage.getItem(STORAGE.assignments)) {
+            const campaigns = JSON.parse(localStorage.getItem(STORAGE.campaigns));
+            const usersList = JSON.parse(localStorage.getItem(STORAGE.users));
+            let assignMap = {};
+            for (let i=0; i<usersList.length; i++) {
+                if (usersList[i].role === 'manager') assignMap[usersList[i].id] = campaigns.map(c => c.id);
+            }
+            localStorage.setItem(STORAGE.assignments, JSON.stringify(assignMap));
+        }
+        if (!localStorage.getItem(STORAGE.documents)) {
+            localStorage.setItem(STORAGE.documents, JSON.stringify([]));
+        }
+        if (!localStorage.getItem(STORAGE.agents)) {
+            const usersList = JSON.parse(localStorage.getItem(STORAGE.users));
+            const agentObjs = usersList.filter(u => u.role === 'agent').map(u => ({ id: 'ag_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), name: u.fullName }));
+            // Relie chaque compte agent à son entrée nouvellement créée
+            for (let i=0; i<usersList.length; i++) {
+                if (usersList[i].role === 'agent') {
+                    const match = agentObjs.find(a => a.name === usersList[i].fullName && !a._used);
+                    if (match) { usersList[i].agentId = match.id; match._used = true; }
+                }
+            }
+            agentObjs.forEach(a => delete a._used);
+            localStorage.setItem(STORAGE.users, JSON.stringify(usersList));
+            localStorage.setItem(STORAGE.agents, JSON.stringify(agentObjs));
+        } else {
+            // Migration : ancien format = tableau de chaînes -> tableau d'objets {id, name}
+            try {
+                let agentsRaw = JSON.parse(localStorage.getItem(STORAGE.agents));
+                if (agentsRaw.length && typeof agentsRaw[0] === 'string') {
+                    const usersList = JSON.parse(localStorage.getItem(STORAGE.users));
+                    const agentObjs = agentsRaw.map((name, idx) => ({ id: 'ag_'+Date.now()+'_'+idx, name }));
+                    for (let u of usersList) {
+                        if (u.role === 'agent' && !u.agentId) {
+                            const match = agentObjs.find(a => a.name === u.fullName);
+                            if (match) u.agentId = match.id;
+                        }
+                    }
+                    localStorage.setItem(STORAGE.users, JSON.stringify(usersList));
+                    localStorage.setItem(STORAGE.agents, JSON.stringify(agentObjs));
+                }
+            } catch(e) {}
+        }
+    }
+    initData();
+
+    function getUsers() { return JSON.parse(localStorage.getItem(STORAGE.users)) || []; }
+    function getCampaigns() { return JSON.parse(localStorage.getItem(STORAGE.campaigns)) || []; }
+    function getOne2One() { return JSON.parse(localStorage.getItem(STORAGE.one2one)) || []; }
+    function getEvaluations() { return JSON.parse(localStorage.getItem(STORAGE.evaluations)) || []; }
+    function getAttestations() { return JSON.parse(localStorage.getItem(STORAGE.attestations)) || []; }
+    function getCoachings() { return JSON.parse(localStorage.getItem(STORAGE.coachings)) || []; }
+    function getAssignments() { return JSON.parse(localStorage.getItem(STORAGE.assignments)) || {}; }
+    function getSettings() { return JSON.parse(localStorage.getItem(STORAGE.settings)) || { indicators: [] }; }
+    function getIndicators() { return getSettings().indicators || []; }
+    function getDocuments() { return JSON.parse(localStorage.getItem(STORAGE.documents)) || []; }
+    function getAgents() { return JSON.parse(localStorage.getItem(STORAGE.agents)) || []; }
+    function getAgentName(agentId) { const a = getAgents().find(a => a.id === agentId); return a ? a.name : ''; }
+
+    // Construit les <option> pour un <select> d'agents, en désambiguïsant les homonymes par leur identifiant de connexion
+    function buildAgentOptionsHtml(selectedId) {
+        const agents = getAgents();
+        const users = getUsers();
+        const nameCounts = {};
+        agents.forEach(a => nameCounts[a.name] = (nameCounts[a.name]||0)+1);
+        let html = '<option value="">-- Choisir un agent --</option>';
+        for (let a of agents) {
+            const linkedUser = users.find(u => u.role === 'agent' && u.agentId === a.id);
+            const suffix = nameCounts[a.name] > 1 && linkedUser ? ` (compte: ${linkedUser.username})` : '';
+            html += `<option value="${a.id}" ${a.id===selectedId?'selected':''}>${escapeHtml(a.name)}${escapeHtml(suffix)}</option>`;
+        }
+        return html;
+    }
+    function saveOne2One(d) { localStorage.setItem(STORAGE.one2one, JSON.stringify(d)); }
+    function saveEvaluations(d) { localStorage.setItem(STORAGE.evaluations, JSON.stringify(d)); }
+    function saveAttestations(d) { localStorage.setItem(STORAGE.attestations, JSON.stringify(d)); }
+    function saveCoachings(d) { localStorage.setItem(STORAGE.coachings, JSON.stringify(d)); }
+    function saveUsers(d) { localStorage.setItem(STORAGE.users, JSON.stringify(d)); }
+    function saveAssignments(d) { localStorage.setItem(STORAGE.assignments, JSON.stringify(d)); }
+    function saveSettings(d) { localStorage.setItem(STORAGE.settings, JSON.stringify(d)); }
+    function saveCampaigns(d) { localStorage.setItem(STORAGE.campaigns, JSON.stringify(d)); }
+    function saveDocuments(d) { localStorage.setItem(STORAGE.documents, JSON.stringify(d)); }
+    function saveAgents(d) { localStorage.setItem(STORAGE.agents, JSON.stringify(d)); }
+
+    // ----- HELPERS RÔLES -----
+    function isAdmin() { return currentUser && currentUser.role === 'admin'; }
+    function isManager() { return currentUser && currentUser.role === 'manager'; }
+    function isAgent() { return currentUser && currentUser.role === 'agent'; }
+
+    // Crée un compte utilisateur "Agent". Si existingAgentId est fourni, le compte est lié à cet agent
+    // déjà existant (utile en cas d'homonymie). Sinon, un nouvel agent est créé.
+    function createAgentAccount(fullName, username, password, existingAgentId) {
+        fullName = fullName.trim();
+        username = username.trim();
+        if (!username) return { ok: false, msg: "Identifiant requis" };
+        const usersNow = getUsers();
+        if (usersNow.find(u => u.username === username)) return { ok: false, msg: "Cet identifiant existe déjà" };
+        if (!password) password = Math.random().toString(36).slice(2,8);
+        let agentId = existingAgentId;
+        const agents = getAgents();
+        if (!agentId) {
+            if (!fullName) return { ok: false, msg: "Nom requis" };
+            agentId = 'ag_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+            agents.push({ id: agentId, name: fullName });
+            saveAgents(agents);
+        } else {
+            const ag = agents.find(a => a.id === agentId);
+            if (!ag) return { ok: false, msg: "Agent introuvable" };
+            fullName = ag.name;
+        }
+        usersNow.push({ id: 'u'+Date.now(), username, password, role: 'agent', fullName, agentId });
+        saveUsers(usersNow);
+        return { ok: true, username, password, agentId };
+    }
+
+    // Relie un compte agent existant à un autre agent de la liste (résout les homonymies)
+    function relinkAgentAccount(userId, newAgentId) {
+        const users = getUsers();
+        const u = users.find(u => u.id === userId);
+        if (!u || u.role !== 'agent') return false;
+        const ag = getAgents().find(a => a.id === newAgentId);
+        if (!ag) return false;
+        u.agentId = newAgentId;
+        u.fullName = ag.name;
+        saveUsers(users);
+        return true;
+    }
+
+    let currentUser = null;
+    let activeView = 'dashboard';
+    let charts = {};
+    let popupOpen = false;
+
+    const COMPETENCE_ITEMS = [
+        "Écoute active", "Empathie", "Argumentation chiffres clés", "Traitement objection",
+        "Maîtrise script", "Proposition fluide (DEL/PEL)", "Verrouillage don", "Prise de coordonnées",
+        "Rebond sur refus", "Ton & rythme", "Motivation", "Proactivité","Blindage","Concentration","Intelligence émotionnelle",
+        "Traitement réticences", "Capacité à créer la confiance","Déduction fiscale expliquée","Résilience","Conviction"
+    ];
+
+    const EVAL_ITEMS = [
+        { name: "Identification", desc: "Se présente, mentionne CNIL, enregistrement appel" },
+        { name: "Présentation de l'organisme", desc: "Cite les 3 actions principales + question thème" },
+        { name: "Argumentation & empathie", desc: "Chiffres-clés, situation alarmante, histoire marquante" },
+        { name: "Appel au don", desc: "Invite au don, mentionne déduction fiscale, repositionne si besoin" },
+        { name: "Gestion des objections", desc: "Reformule, utilise l'argument du guide / des bénéficiaires" },
+        { name: "Proposition", desc: "Propose le don en ligne ou le prélèvement, rassure" },
+        { name: "Verrouillage", desc: "Confirme promesse de don à voix haute + date + blindage" },
+        { name: "Coordonnées", desc: "Valide email, mobile, adresse postale complète" },
+        { name: "Suivi formulaire", desc: "Reste en ligne, envoie lien, blindage réception" },
+        { name: "Qualité globale", desc: "Ton, rythme, naturel, clôture professionnelle" }
+    ];
+
+    function getEvalItemsForPopup(campaignType) {
+        const items = EVAL_ITEMS.map(item => ({ ...item }));
+        if (campaignType === 'PPA') {
+            items[3].desc = "Invite au prélèvement mensuel, mentionne déduction fiscale";
+            items[5].desc = "Propose le prélèvement en ligne, rassure sur l'IBAN, accompagne";
+        } else {
+            items[3].desc = "Invite au don ponctuel ou mensuel, mentionne déduction fiscale";
+            items[5].desc = "Propose don en ligne avec TPE ou lien sécurisé, gestion promesse";
+        }
+        return items;
+    }
+
+    // ----- OBJECTIFS PAR INDICATEUR : réalisation, statut, widget réutilisable -----
+    // Calcule la réalisation d'un indicateur "built-in" à partir d'un enregistrement One-to-One
+    function computeRealisationFromOne2One(record, indicatorKey) {
+        if (!record) return null;
+        const cu = record.cuVolume || 0;
+        if (indicatorKey === 'cuPerHour') return cu;
+        if (indicatorKey === 'promesseRate') return cu ? +(record.promessesCount / cu * 100).toFixed(1) : 0;
+        if (indicatorKey === 'delRate') return cu ? +(record.delCount / cu * 100).toFixed(1) : 0;
+        if (indicatorKey === 'pelRate') return cu ? +(record.pelCount / cu * 100).toFixed(1) : 0;
+        return null;
+    }
+
+    // Retourne le statut d'atteinte d'un objectif : 'atteint' | 'depasse' | 'nonAtteint'
+    function computeObjectifStatus(target, realisation) {
+        if (realisation === null || realisation === undefined || isNaN(realisation)) return null;
+        target = parseFloat(target);
+        realisation = parseFloat(realisation);
+        if (realisation > target) return 'depasse';
+        if (realisation === target) return 'atteint';
+        return 'nonAtteint';
+    }
+
+    function statusBadgeHtml(status) {
+        if (status === 'depasse') return '<span class="badge" style="background:#e6f7f0; color:#0d7a5f;">🚀 Dépassé</span>';
+        if (status === 'atteint') return '<span class="badge" style="background:#e6f7f0; color:#0d7a5f;">✅ Atteint</span>';
+        if (status === 'nonAtteint') return '<span class="badge" style="background:#fde8e8; color:#b33c1a;">❌ Non atteint</span>';
+        return '<span class="badge" style="background:#f1f5f9; color:#8899aa;">— N/A</span>';
+    }
+
+    function formatIndicatorValue(value, type) {
+        if (value === null || value === undefined || value === '') return '—';
+        return type === 'percentage' ? `${value}%` : `${value}`;
+    }
+
+    // Trouve le dernier enregistrement One-to-One (le plus récent, avant la date donnée si fournie) pour un agent
+    function getPreviousOne2OneFor(teleacteurId, beforeDate) {
+        if (!teleacteurId) return null;
+        const all = getOne2One().filter(r => (r.teleacteurId ? r.teleacteurId === teleacteurId : r.teleacteur === teleacteurId) && (!beforeDate || r.date < beforeDate));
+        if (!all.length) return null;
+        all.sort((a,b) => (a.date < b.date ? 1 : -1));
+        return all[0];
+    }
+
+    // Construit le widget HTML "Objectifs de travail par indicateur" (utilisé par One-to-One et Coaching)
+    function buildObjectifsTravailWidgetHtml(containerId, existingRows) {
+        return `<div id="${containerId}"></div>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+            <button type="button" class="secondary addObjRow" data-target="${containerId}" style="padding:4px 12px; font-size:11px;">+ Ajouter un indicateur</button>
+            <button type="button" class="secondary addAllObjRows" data-target="${containerId}" style="padding:4px 12px; font-size:11px;">+ Tous les indicateurs</button>
+        </div>`;
+    }
+
+    // Attache la logique dynamique du widget objectifs-par-indicateur. Retourne une fonction getRows().
+    function attachObjectifsTravailWidget(containerId) {
+        const indicators = getIndicators();
+        const listDiv = document.getElementById(containerId);
+        let rows = [];
+        const render = function() {
+            let html = '';
+            for (let idx=0; idx<rows.length; idx++) {
+                let r = rows[idx];
+                let options = '';
+                for (let i=0; i<indicators.length; i++) {
+                    options += `<option value="${indicators[i].id}" ${indicators[i].id===r.indicatorId ? 'selected':''}>${escapeHtml(indicators[i].name)} (${indicators[i].type==='percentage'?'%':'qté'})</option>`;
+                }
+                html += `<div class="dynamic-list-item">
+                    <select class="objRowIndicator" data-idx="${idx}" style="flex:2;">${options}</select>
+                    <input type="number" step="0.1" class="objRowTarget" data-idx="${idx}" value="${r.target}" placeholder="Objectif" style="flex:1;">
+                    <button type="button" class="removeObjRow" data-idx="${idx}" style="background:#e8692c; padding:4px 8px; color:white; border-radius:20px;">✖</button>
+                </div>`;
+            }
+            listDiv.innerHTML = html || '<p style="color:#999; font-size:11px;">Aucun objectif fixé pour cette période.</p>';
+            document.querySelectorAll(`.removeObjRow`).forEach(btn => btn.onclick = function() {
+                rows.splice(parseInt(this.getAttribute('data-idx')), 1); render();
+            });
+            document.querySelectorAll(`.objRowIndicator`).forEach(sel => sel.onchange = function() {
+                let idx = parseInt(this.getAttribute('data-idx'));
+                let ind = indicators.find(i => i.id === this.value);
+                rows[idx].indicatorId = this.value;
+                rows[idx].name = ind ? ind.name : '';
+                rows[idx].type = ind ? ind.type : 'quantity';
+                rows[idx].key = ind ? ind.key : null;
+            });
+            document.querySelectorAll(`.objRowTarget`).forEach(inp => inp.onchange = function() {
+                rows[parseInt(this.getAttribute('data-idx'))].target = parseFloat(this.value) || 0;
+            });
+        };
+        document.querySelector(`.addObjRow[data-target="${containerId}"]`).onclick = function() {
+            if (!indicators.length) { alert("Aucun indicateur défini. Contactez l'admin (rubrique Objectifs)."); return; }
+            const ind = indicators[0];
+            rows.push({ indicatorId: ind.id, name: ind.name, type: ind.type, key: ind.key, target: ind.target });
+            render();
+        };
+        document.querySelector(`.addAllObjRows[data-target="${containerId}"]`).onclick = function() {
+            rows = indicators.map(ind => ({ indicatorId: ind.id, name: ind.name, type: ind.type, key: ind.key, target: ind.target }));
+            render();
+        };
+        render();
+        return function getRows() { return rows.map(r => ({ indicatorId: r.indicatorId, name: r.name, type: r.type, key: r.key, target: r.target })); };
+    }
+
+    // Construit le tableau de suivi (comparaison objectif S-1 vs réalisation courante) pour le One-to-One
+    function buildSuiviObjectifsHtml(teleacteur, currentDate) {
+        const prev = getPreviousOne2OneFor(teleacteur, currentDate);
+        if (!prev || !prev.objectifsTravail || !prev.objectifsTravail.length) {
+            return '<p style="color:#999; font-size:11px;">Aucun objectif fixé lors du précédent one-to-one pour cet agent.</p>';
+        }
+        let html = '<div class="table-responsive"><table><thead><tr><th>Indicateur</th><th>Objectif fixé</th><th>Réalisation</th><th>Statut</th></tr></thead><tbody>';
+        for (let obj of prev.objectifsTravail) {
+            let realisationInputHtml;
+            if (obj.key) {
+                realisationInputHtml = `<span class="suivi-auto-realisation" data-key="${obj.key}">calcul auto.</span>`;
+            } else {
+                realisationInputHtml = `<input type="number" step="0.1" class="suivi-manual-realisation" data-indicator="${escapeHtml(obj.name)}" data-target="${obj.target}" data-type="${obj.type}" placeholder="Valeur constatée" style="width:120px; display:inline-block;">`;
+            }
+            html += `<tr data-key="${obj.key||''}" data-target="${obj.target}" data-type="${obj.type}" data-name="${escapeHtml(obj.name)}">
+                <td>${escapeHtml(obj.name)}</td><td>${formatIndicatorValue(obj.target, obj.type)}</td>
+                <td class="suivi-realisation-cell">${realisationInputHtml}</td>
+                <td class="suivi-status-cell">${statusBadgeHtml(null)}</td>
+            </tr>`;
+        }
+        html += '</tbody></table></div>';
+        return html;
+    }
+
+    // Met à jour en direct les statuts du tableau de suivi selon les valeurs saisies dans le formulaire One-to-One
+    function refreshSuiviObjectifs(form) {
+        const rows = form.querySelectorAll('#suiviObjectifsContainer tr[data-name]');
+        const cuVolume = parseFloat(form.querySelector('#o_cuVolume')?.value) || 0;
+        const promesses = parseFloat(form.querySelector('#o_promesses')?.value) || 0;
+        const del = parseFloat(form.querySelector('#o_delCount')?.value) || 0;
+        const pel = parseFloat(form.querySelector('#o_pelCount')?.value) || 0;
+        rows.forEach(row => {
+            const key = row.getAttribute('data-key');
+            const target = parseFloat(row.getAttribute('data-target'));
+            let realisation = null;
+            if (key === 'cuPerHour') realisation = cuVolume;
+            else if (key === 'promesseRate') realisation = cuVolume ? +(promesses/cuVolume*100).toFixed(1) : 0;
+            else if (key === 'delRate') realisation = cuVolume ? +(del/cuVolume*100).toFixed(1) : 0;
+            else if (key === 'pelRate') realisation = cuVolume ? +(pel/cuVolume*100).toFixed(1) : 0;
+            else {
+                const manualInput = row.querySelector('.suivi-manual-realisation');
+                if (manualInput && manualInput.value !== '') realisation = parseFloat(manualInput.value);
+            }
+            const status = computeObjectifStatus(target, realisation);
+            row.querySelector('.suivi-status-cell').innerHTML = statusBadgeHtml(status);
+        });
+    }
+
+    // ----- RENDER PRINCIPAL -----
+    function render() {
+        const root = document.getElementById('appRoot');
+        if (!root) return;
+        if (!currentUser) {
+            root.innerHTML = renderLogin();
+            attachLoginEvents();
+            attachUiPrefsControl();
+            return;
+        }
+        // Les vues suivantes s'affichent uniquement dans une fenêtre popup : on affiche la page
+        // d'accueil en arrière-plan pour que la fermeture du popup ramène directement à l'accueil.
+        const popupOnlyViews = ['one2one', 'evaluation', 'attestation', 'coaching', 'deleteHistory'];
+        let popupToOpen = null;
+        if (popupOnlyViews.includes(activeView)) {
+            popupToOpen = activeView;
+            activeView = 'dashboard';
+        }
+        root.innerHTML = renderMainApp();
+        attachMainEvents();
+        attachUiPrefsControl();
+        if (popupToOpen) {
+            renderDashboardTiles();
+            if (popupToOpen === 'one2one' && !isAgent()) openOneToOnePopup();
+            else if (popupToOpen === 'evaluation' && !isAgent()) openEvaluationPopup();
+            else if (popupToOpen === 'attestation' && !isAgent()) openAttestationPopup();
+            else if (popupToOpen === 'coaching' && !isAgent()) openCoachingPopup();
+            else if (popupToOpen === 'deleteHistory' && isAdmin()) renderDeleteHistoryPopup();
+        }
+        else if (activeView === 'createUser' && isAdmin()) renderUserManagement();
+        else if (activeView === 'manageAgents' && isAdmin()) renderManageAgents();
+        else if (activeView === 'assignCampaigns' && isAdmin()) renderAssignCampaignsMatrix();
+        else if (activeView === 'historiques' && !isAgent()) renderHistoriquesMenu();
+        else if (activeView === 'bilan') renderBilan();
+        else if (activeView === 'agentOne2One' && isAgent()) renderAgentRecordsList('one2one');
+        else if (activeView === 'agentCoaching' && isAgent()) renderAgentRecordsList('coaching');
+        else if (activeView === 'agentAttestation' && isAgent()) renderAgentRecordsList('attestation');
+        else if (activeView === 'agentEval' && isAgent()) renderAgentEvaluation();
+        else if (activeView === 'download' && !isAgent()) renderDownloadPanel();
+        else if (activeView === 'aide') renderAideComplete();
+        else if (activeView === 'settings' && isAdmin()) renderAdminSettings();
+        else renderDashboardTiles();
+    }
+
+    function renderLogin() {
+        return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fef0ea,#f5d8cb);">
+            <div class="card" style="width:360px;text-align:center;padding:30px;">
+                <div class="login-prefs-bar">${uiPrefsControlHtml()}</div>
+                <div style="margin-bottom:16px;">
+                    <h1 style="color:#e8692c; font-size:30px;">CONNECT.RCI</h1>
+                    <p style="color:#0d7a5f; font-weight:500; font-size:13px;">Let's build the future together</p>
+                </div>
+                <input type="text" id="loginUsername" placeholder="Identifiant" style="margin-bottom:10px;">
+                <input type="password" id="loginPassword" placeholder="Mot de passe" style="margin-bottom:16px;" onkeypress="if(event.key==='Enter') document.getElementById('doLoginBtn').click();">
+                <button id="doLoginBtn" style="width:100%; background:#e8692c;">Se connecter</button>
+            </div>
+        </div>`;
+    }
+
+    function attachLoginEvents() {
+        const btn = document.getElementById('doLoginBtn');
+        if (btn) btn.onclick = function() {
+            const username = document.getElementById('loginUsername').value;
+            const pwd = document.getElementById('loginPassword').value;
+            const user = getUsers().find(u => u.username === username && u.password === pwd);
+            if (user) { currentUser = { ...user }; activeView = 'dashboard'; render(); }
+            else alert("Identifiants invalides");
+        };
+    }
+
+    function renderMainApp() {
+        const isAdmin = currentUser.role === 'admin';
+        return `<div class="header">
+            <div class="logo-text"><h1>CONNECT.RCI</h1><p>Let's build the future together</p></div>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end;">
+                ${uiPrefsControlHtml()}
+                <div class="user-badge"><i class="fas fa-user-check"></i> ${escapeHtml(currentUser.fullName)} (${currentUser.role})</div>
+            </div>
+        </div>
+        <div class="nav-bar">
+            <div class="nav-left">
+                <button class="nav-btn active" data-view="dashboard"><i class="fas fa-home"></i> Accueil</button>
+            </div>
+            <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+        </div>
+        <div class="main-content" id="dynamicView"></div>`;
+    }
+
+    function attachMainEvents() {
+        const btns = document.querySelectorAll('.nav-btn[data-view]');
+        for (let i=0; i<btns.length; i++) btns[i].onclick = function() { 
+            if (popupOpen) {
+                const oldPopup = document.querySelector('.popup-modal');
+                if (oldPopup) { oldPopup.remove(); popupOpen = false; }
+            }
+            activeView = this.getAttribute('data-view'); 
+            render(); 
+        };
+        const logout = document.getElementById('logoutBtn');
+        if (logout) logout.onclick = function() { currentUser = null; render(); };
+    }
+
+    // ----- DASHBOARD EN TUILE -----
+    function renderDashboardTiles() {
+        const ad = isAdmin(), mgr = isManager(), ag = isAgent();
+        const allOne = getOne2One();
+        const allEval = getEvaluations();
+        const allAttest = getAttestations();
+        const allCoach = getCoachings();
+        let oneCount, evalCount, attestCount, coachCount;
+        if (ad) {
+            oneCount = allOne.length; evalCount = allEval.length; attestCount = allAttest.length; coachCount = allCoach.length;
+        } else if (mgr) {
+            oneCount = allOne.filter(r => r.manager === currentUser.fullName).length;
+            evalCount = allEval.filter(r => r.manager === currentUser.fullName).length;
+            attestCount = allAttest.filter(r => r.manager === currentUser.fullName).length;
+            coachCount = allCoach.filter(r => r.manager === currentUser.fullName).length;
+        } else {
+            oneCount = allOne.filter(r => r.teleacteur === currentUser.fullName).length;
+            evalCount = allEval.filter(r => r.teleacteur === currentUser.fullName).length;
+            attestCount = allAttest.filter(r => r.agent === currentUser.fullName).length;
+            coachCount = allCoach.filter(r => r.agent === currentUser.fullName).length;
+        }
+        const agentCount = getAgents().length;
+        const container = document.getElementById('dynamicView');
+
+        let tiles;
+        if (ag) {
+            tiles = [
+                { view: 'agentOne2One', icon: 'fa-calendar-week', title: 'Mes One-to-One', desc: 'Consulter et attester' },
+                { view: 'agentCoaching', icon: 'fa-chalkboard-teacher', title: 'Mes Coachings', desc: 'Consulter et attester' },
+                { view: 'agentAttestation', icon: 'fa-file-signature', title: 'Mes Attestations', desc: 'Consulter et attester' },
+                { view: 'agentEval', icon: 'fa-clipboard-list', title: 'Ma grille d\'évaluation', desc: 'Score & évolution' },
+                { view: 'bilan', icon: 'fa-chart-line', title: 'Mon bilan', desc: 'Suivi personnel' },
+                { view: 'aide', icon: 'fa-book-open', title: 'Aide', desc: 'Guide d\'utilisation' }
+            ];
+        } else {
+            tiles = [
+                { view: 'one2one', icon: 'fa-calendar-week', title: 'One-to-One', desc: 'Saisie hebdomadaire', admin: false },
+                { view: 'evaluation', icon: 'fa-clipboard-list', title: 'Grille Évaluation', desc: 'Évaluer un agent', admin: false },
+                { view: 'attestation', icon: 'fa-file-signature', title: 'Attestation Débrief', desc: 'Saisir une attestation', admin: false },
+                { view: 'coaching', icon: 'fa-chalkboard-teacher', title: 'Fiche Coaching', desc: 'Saisir une fiche coaching', admin: false },
+                { view: 'historiques', icon: 'fa-history', title: 'Historiques', desc: 'One-to-One, Évaluations, Attestations, Coachings', admin: false },
+                { view: 'bilan', icon: 'fa-chart-line', title: 'Bilan & Suivi', desc: 'Indicateurs, graphes, récidives', admin: false },
+                { view: 'download', icon: 'fa-download', title: 'Export Excel', desc: 'Exporter les données', admin: false },
+                { view: 'aide', icon: 'fa-book-open', title: 'Aide & Bibliothèque', desc: 'Guides et scripts', admin: false },
+                { view: 'createUser', icon: 'fa-user-plus', title: 'Gestion utilisateurs', desc: 'Créer / supprimer des comptes', admin: true },
+                { view: 'manageAgents', icon: 'fa-users', title: 'Gestion agents', desc: 'Comptes téléacteurs', admin: true },
+                { view: 'assignCampaigns', icon: 'fa-tags', title: 'Affecter campagnes', desc: 'Associer agents aux campagnes', admin: true },
+                { view: 'settings', icon: 'fa-sliders-h', title: 'Objectifs', desc: 'Paramétrer les cibles par indicateur', admin: true },
+                { view: 'deleteHistory', icon: 'fa-trash-alt', title: 'Supprimer historiques', desc: 'Nettoyer les données', admin: true }
+            ];
+        }
+
+        let tilesHtml = '';
+        for (let t of tiles) {
+            if (t.admin && !ad) continue;
+            tilesHtml += `
+                <div class="dash-tile ${t.admin ? 'admin-tile' : ''}" data-view="${t.view}">
+                    <i class="fas ${t.icon}"></i>
+                    <div class="tile-title">${t.title}</div>
+                    <div class="tile-desc">${t.desc}</div>
+                </div>
+            `;
+        }
+
+        const roleLabel = ad ? '👑 Admin' : (mgr ? '👤 Manager' : '🎧 Agent');
+        container.innerHTML = `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <h3 style="color:#1e4663;"><i class="fas fa-th-large" style="color:#e8692c;"></i> Tableau de bord</h3>
+                    <span style="font-size:12px; color:#8899aa;">${roleLabel}</span>
+                </div>
+                <div class="dash-stats">
+                    <div class="stat-item"><div class="stat-number">${oneCount}</div><div class="stat-label">One-to-One</div></div>
+                    <div class="stat-item"><div class="stat-number">${evalCount}</div><div class="stat-label">Évaluations</div></div>
+                    <div class="stat-item"><div class="stat-number">${attestCount}</div><div class="stat-label">Attestations</div></div>
+                    <div class="stat-item"><div class="stat-number">${coachCount}</div><div class="stat-label">Coachings</div></div>
+                    ${!ag ? `<div class="stat-item"><div class="stat-number">${agentCount}</div><div class="stat-label">Agents</div></div>` : ''}
+                    <div class="stat-item"><div class="stat-number">${ad ? '👑' : (mgr ? '👤' : '🎧')}</div><div class="stat-label">${roleLabel.replace(/^[^ ]+ /,'')}</div></div>
+                </div>
+                <div class="dashboard-grid" id="tilesGrid">
+                    ${tilesHtml}
+                </div>
+            </div>
+        `;
+
+        document.querySelectorAll('.dash-tile').forEach(tile => {
+            tile.onclick = function() {
+                activeView = this.getAttribute('data-view');
+                render();
+            };
+        });
+    }
+
+    // ----- FONCTIONS DE FILTRAGE PAR RÔLE -----
+    function filterOne2One() {
+        const data = getOne2One();
+        if (isAdmin()) return data;
+        if (isAgent()) return data.filter(r => r.teleacteurId ? r.teleacteurId === currentUser.agentId : r.teleacteur === currentUser.fullName);
+        return data.filter(r => r.manager === currentUser.fullName);
+    }
+
+    function filterEvaluations() {
+        const data = getEvaluations();
+        if (isAdmin()) return data;
+        if (isAgent()) return data.filter(r => r.teleacteurId ? r.teleacteurId === currentUser.agentId : r.teleacteur === currentUser.fullName);
+        return data.filter(r => r.manager === currentUser.fullName);
+    }
+
+    function filterAttestations() {
+        const data = getAttestations();
+        if (isAdmin()) return data;
+        if (isAgent()) return data.filter(r => r.agentId ? r.agentId === currentUser.agentId : r.agent === currentUser.fullName);
+        return data.filter(r => r.manager === currentUser.fullName);
+    }
+
+    function filterCoachings() {
+        const data = getCoachings();
+        if (isAdmin()) return data;
+        if (isAgent()) return data.filter(r => r.agentId ? r.agentId === currentUser.agentId : r.agent === currentUser.fullName);
+        return data.filter(r => r.manager === currentUser.fullName);
+    }
+
+    // ----- VUES AGENT : consultation + attestation électronique -----
+    function updateAgentAck(type, id, status, comment) {
+        let getFn, saveFn;
+        if (type === 'one2one') { getFn = getOne2One; saveFn = saveOne2One; }
+        else if (type === 'coaching') { getFn = getCoachings; saveFn = saveCoachings; }
+        else if (type === 'attestation') { getFn = getAttestations; saveFn = saveAttestations; }
+        else return;
+        const all = getFn();
+        const rec = all.find(r => r.id === id);
+        if (!rec) return;
+        rec.agentAck = { status, date: new Date().toISOString().slice(0,10), comment: comment || '' };
+        saveFn(all);
+    }
+
+    function renderAgentRecordsList(type) {
+        let data, title, icon;
+        if (type === 'one2one') { data = filterOne2One(); title = 'Mes One-to-One'; icon = 'fa-calendar-week'; }
+        else if (type === 'coaching') { data = filterCoachings(); title = 'Mes Fiches Coaching'; icon = 'fa-chalkboard-teacher'; }
+        else { data = filterAttestations(); title = 'Mes Attestations de débrief'; icon = 'fa-file-signature'; }
+        data = data.slice().sort((a,b) => (a.date < b.date ? 1 : -1));
+        const campaigns = getCampaigns();
+        const campaignMap = {};
+        for (let c of campaigns) campaignMap[c.id] = c.name;
+
+        let cardsHtml = '';
+        if (!data.length) {
+            cardsHtml = `<p style="text-align:center; padding:20px; color:#8899aa;">Aucune fiche pour le moment.</p>`;
+        } else {
+            for (let r of data) {
+                let detailsHtml = '';
+                if (type === 'one2one') {
+                    let objTxt = (r.objectifsTravail||[]).map(o => `${o.name}: ${formatIndicatorValue(o.target,o.type)}`).join(' | ') || '—';
+                    detailsHtml = `<p><strong>CU:</strong> ${r.cuVolume} • <strong>Promesses:</strong> ${r.promessesCount||0} • <strong>DEL:</strong> ${r.delCount||0} • <strong>PEL:</strong> ${r.pelCount||0}</p>
+                        <p><strong>Points forts:</strong> ${(r.pointsForts||[]).join(', ')}</p>
+                        <p><strong>Axes d'amélioration:</strong> ${(r.axesAmelioration||[]).join(', ')}</p>
+                        <p><strong>Analyse flash:</strong> ${escapeHtml(r.flash||'—')}</p>
+                        <p><strong>Objectifs fixés pour S+1:</strong> ${objTxt}</p>`;
+                } else if (type === 'coaching') {
+                    let objTxt = (r.objectifsTravail||[]).map(o => `${o.name}: ${formatIndicatorValue(o.target,o.type)}`).join(' | ') || '—';
+                    detailsHtml = `<p><strong>Problématique:</strong> ${escapeHtml(r.problematique||'—')}</p>
+                        <p><strong>Cause racine:</strong> ${escapeHtml(r.cause||'—')}</p>
+                        <p><strong>Actions:</strong> ${escapeHtml(r.actions||'—')}</p>
+                        <p><strong>Objectifs fixés:</strong> ${objTxt}</p>`;
+                } else {
+                    detailsHtml = `<p><strong>Indice d'appel:</strong> ${escapeHtml(r.indice||'—')}</p>
+                        <p><strong>Écarts observés:</strong> ${escapeHtml(r.ecarts||'—')}</p>
+                        <p><strong>Cause racine:</strong> ${escapeHtml(r.cause||'—')}</p>
+                        <p><strong>Actions:</strong> ${escapeHtml(r.actions||'—')}</p>`;
+                }
+                cardsHtml += `<div class="card">
+                    <div class="flex-between"><strong>${r.date} — ${escapeHtml(campaignMap[r.campagneId] || r.campagneId || '')}</strong>${agentAckBadge(r.agentAck)}</div>
+                    <p style="color:#8899aa; font-size:11px;">Manager : ${escapeHtml(r.manager)}</p>
+                    ${detailsHtml}
+                    ${(!r.agentAck || r.agentAck.status === 'pending') ? `
+                    <div style="display:flex; gap:8px; margin-top:8px;">
+                        <button class="agentSignBtn" data-type="${type}" data-id="${r.id}" style="background:#0d7a5f;"><i class="fas fa-signature"></i> J'atteste / Je signe</button>
+                        <button class="agentRejectBtn" data-type="${type}" data-id="${r.id}" class="danger" style="background:#b33c1a;">Refuser / Contester</button>
+                    </div>` : ''}
+                </div>`;
+            }
+        }
+        document.getElementById('dynamicView').innerHTML = `<div class="card"><h3><i class="fas ${icon}"></i> ${title}</h3></div>${cardsHtml}`;
+        document.querySelectorAll('.agentSignBtn').forEach(btn => btn.onclick = function() {
+            if (confirm("Confirmez-vous cette signature électronique ? Vous attestez avoir pris connaissance de cette fiche et être en phase avec son contenu.")) {
+                updateAgentAck(this.getAttribute('data-type'), parseInt(this.getAttribute('data-id')), 'signed');
+                renderAgentRecordsList(type);
+            }
+        });
+        document.querySelectorAll('.agentRejectBtn').forEach(btn => btn.onclick = function() {
+            const reason = prompt("Merci de préciser le motif de votre refus / contestation :");
+            if (reason === null) return;
+            updateAgentAck(this.getAttribute('data-type'), parseInt(this.getAttribute('data-id')), 'rejected', reason);
+            renderAgentRecordsList(type);
+        });
+    }
+
+    function renderAgentEvaluation() {
+        const evals = filterEvaluations().slice().sort((a,b) => (a.date < b.date ? 1 : -1));
+        const container = document.getElementById('dynamicView');
+        if (!evals.length) {
+            container.innerHTML = `<div class="card"><h3><i class="fas fa-clipboard-list"></i> Ma grille d'évaluation</h3><p style="text-align:center; padding:20px; color:#8899aa;">Aucune évaluation enregistrée pour le moment.</p></div>`;
+            return;
+        }
+        const latest = evals[0];
+        let itemsHtml = '';
+        for (let cr of latest.criteriaResults) {
+            let cls = cr.result === 'OK' ? 'eval-table-ok' : (cr.result === 'KO' ? 'eval-table-ko' : 'eval-table-na');
+            itemsHtml += `<div class="eval-section-card"><div class="flex-between"><strong>${escapeHtml(cr.item)}</strong><span class="${cls}">${cr.result}</span></div>${cr.observation ? `<div class="eval-desc">${escapeHtml(cr.observation)}</div>` : ''}</div>`;
+        }
+        let historyRows = '';
+        for (let e of evals) historyRows += `<tr><td>${e.date}</td><td>${e.score}%</td></tr>`;
+        container.innerHTML = `<div class="card"><h3><i class="fas fa-clipboard-list"></i> Ma grille d'évaluation</h3>
+            <div class="dash-stats"><div class="stat-item"><div class="stat-number">${latest.score}%</div><div class="stat-label">Dernier score (${latest.date})</div></div>
+            <div class="stat-item"><div class="stat-number">${evals.length}</div><div class="stat-label">Évaluations reçues</div></div></div>
+            <div class="chart-box" style="margin:10px 0;"><canvas id="agentEvalCanvas"></canvas></div>
+            <h4>Détail de la dernière évaluation (${latest.date})</h4>${itemsHtml}
+            <h4 style="margin-top:12px;">Historique des scores</h4>
+            <div class="table-responsive"><table><thead><tr><th>Date</th><th>Score</th></tr></thead><tbody>${historyRows}</tbody></table></div>
+        </div>`;
+        try {
+            const ctx = document.getElementById('agentEvalCanvas').getContext('2d');
+            const sortedAsc = evals.slice().sort((a,b) => (a.date > b.date ? 1 : -1));
+            if (charts.agentEval) charts.agentEval.destroy();
+            charts.agentEval = new Chart(ctx, {
+                type: 'line',
+                data: { labels: sortedAsc.map(e => e.date), datasets: [{ label: 'Score qualité (%)', data: sortedAsc.map(e => e.score), borderColor: '#e8692c', backgroundColor: 'rgba(232,105,44,0.15)', fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+        } catch(e) {}
+    }
+    // ----- SOUS-MENU HISTORIQUES -----
+    let historiquesSubTab = 'historyOne';
+    function renderHistoriquesMenu() {
+        const tabs = [
+            { key: 'historyOne', label: 'One-to-One' },
+            { key: 'historyEval', label: 'Évaluations' },
+            { key: 'historyAttest', label: 'Attestations' },
+            { key: 'historyCoach', label: 'Coachings' }
+        ];
+        let tabsHtml = '';
+        for (let t of tabs) tabsHtml += `<button class="histo-tab-btn ${historiquesSubTab===t.key?'active':''}" data-tab="${t.key}" style="${historiquesSubTab===t.key ? 'background:#e8692c; color:white;' : 'background:#f1f5f9; color:#1e4663;'}">${t.label}</button>`;
+        document.getElementById('dynamicView').innerHTML = `<div class="card">
+            <h3><i class="fas fa-history"></i> Historiques</h3>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">${tabsHtml}</div>
+            <div id="histoSubContent"></div>
+        </div>`;
+        document.querySelectorAll('.histo-tab-btn').forEach(btn => btn.onclick = function() {
+            historiquesSubTab = this.getAttribute('data-tab');
+            renderHistoriquesMenu();
+        });
+        // Redirige temporairement le rendu vers le conteneur du sous-onglet
+        const subContainer = document.getElementById('histoSubContent');
+        const originalGetElementById = document.getElementById.bind(document);
+        document.getElementById = function(id) { return id === 'dynamicView' ? subContainer : originalGetElementById(id); };
+        try {
+            if (historiquesSubTab === 'historyOne') renderHistoryOne();
+            else if (historiquesSubTab === 'historyEval') renderHistoryEval();
+            else if (historiquesSubTab === 'historyAttest') renderHistoryAttest();
+            else if (historiquesSubTab === 'historyCoach') renderHistoryCoach();
+        } finally {
+            document.getElementById = originalGetElementById;
+        }
+    }
+
+    // ----- POPUP Attestation Débrief -----
+    function openAttestationPopup() {
+        if (popupOpen) return;
+        popupOpen = true;
+        const camps = getUserCampaigns();
+        const today = new Date().toISOString().slice(0,10);
+        const supervisorName = currentUser.fullName;
+
+        let optionsHtml = '';
+        for (let i=0; i<camps.length; i++) optionsHtml += `<option value="${camps[i].id}">${camps[i].name}</option>`;
+
+        const popup = document.createElement('div');
+        popup.className = 'popup-modal';
+        popup.innerHTML = `<div class="popup-card">
+            <button class="close-popup" id="closePopupBtn">&times;</button>
+            <h2><i class="fas fa-file-signature"></i> Attestation de débrief</h2>
+            <form id="attestForm">
+                <div class="grid-2cols">
+                    <div>
+                        <label>Téléacteur *</label>
+                        <select id="att_agent" required>${buildAgentOptionsHtml()}</select>
+                    </div>
+                    <div>
+                        <label>Manager (superviseur) *</label>
+                        <input type="text" id="att_manager" value="${escapeHtml(supervisorName)}" readonly>
+                    </div>
+                    <div><label>Campagne *</label><select id="att_campagne" required>${optionsHtml}</select></div>
+                    <div><label>Date</label><input type="date" id="att_date" value="${today}" readonly></div>
+                    <div><label>Indice d'appel</label><input type="text" id="att_indice" placeholder="Indice d'appel"></div>
+                </div>
+                <div><label>Écarts observés</label><textarea id="att_ecarts" rows="2"></textarea></div>
+                <div><label>Cause racine</label><textarea id="att_cause" rows="2"></textarea></div>
+                <div><label>Actions proposées</label><textarea id="att_actions" rows="2"></textarea></div>
+                <div class="grid-2cols">
+                    <div><label>Visa manager</label><input type="text" id="att_visaManager" value="${escapeHtml(supervisorName)}" readonly></div>
+                    <div><label>Visa conseiller</label><input type="text" id="att_visaConseiller" placeholder="Nom du conseiller"></div>
+                </div>
+                <button type="button" id="saveAttestBtn" style="margin-top:10px; background:#e8692c;"><i class="fas fa-save"></i> Enregistrer</button>
+                <button type="button" id="resetAttestBtn" class="secondary" style="margin-top:10px;">⟳ Réinitialiser</button>
+            </form>
+        </div>`;
+        document.body.appendChild(popup);
+
+        document.getElementById('closePopupBtn').onclick = function() { popup.remove(); popupOpen = false; };
+        popup.addEventListener('click', function(e) { if (e.target === popup) { popup.remove(); popupOpen = false; } });
+
+        document.getElementById('saveAttestBtn').onclick = function() {
+            saveAttestationData();
+        };
+        document.getElementById('resetAttestBtn').onclick = function() {
+            document.getElementById('attestForm').reset();
+            document.getElementById('att_date').value = new Date().toISOString().slice(0,10);
+            document.getElementById('att_manager').value = escapeHtml(supervisorName);
+            document.getElementById('att_visaManager').value = escapeHtml(supervisorName);
+        };
+    }
+
+    function saveAttestationData() {
+        const agentId = document.getElementById('att_agent').value;
+        const manager = document.getElementById('att_manager').value;
+        const campagneId = document.getElementById('att_campagne').value;
+        const indice = document.getElementById('att_indice').value.trim();
+        const ecarts = document.getElementById('att_ecarts').value.trim();
+        const cause = document.getElementById('att_cause').value.trim();
+        const actions = document.getElementById('att_actions').value.trim();
+        const visaManager = document.getElementById('att_visaManager').value.trim();
+        const visaConseiller = document.getElementById('att_visaConseiller').value.trim();
+        const date = document.getElementById('att_date').value;
+
+        if (!agentId || !manager || !campagneId) return alert("Agent, manager et campagne sont obligatoires.");
+        const agent = getAgentName(agentId);
+
+        const record = {
+            id: Date.now(),
+            agent,
+            agentId,
+            manager,
+            campagneId,
+            date,
+            indice,
+            ecarts,
+            cause,
+            actions,
+            visaManager,
+            visaConseiller,
+            agentAck: { status: 'pending', date: null, comment: '' }
+        };
+        const all = getAttestations(); all.push(record); saveAttestations(all);
+        const popup = document.querySelector('.popup-modal');
+        if (popup) { popup.remove(); popupOpen = false; }
+        showPopup("Attestation enregistrée", "✅ Succès");
+        render();
+    }
+
+    // ----- POPUP Fiche Coaching -----
+    function openCoachingPopup() {
+        if (popupOpen) return;
+        popupOpen = true;
+        const camps = getUserCampaigns();
+        const today = new Date().toISOString().slice(0,10);
+        const supervisorName = currentUser.fullName;
+
+        let optionsHtml = '';
+        for (let i=0; i<camps.length; i++) optionsHtml += `<option value="${camps[i].id}">${camps[i].name}</option>`;
+
+        const popup = document.createElement('div');
+        popup.className = 'popup-modal';
+        popup.innerHTML = `<div class="popup-card">
+            <button class="close-popup" id="closePopupBtn">&times;</button>
+            <h2><i class="fas fa-chalkboard-teacher"></i> Fiche de coaching</h2>
+            <form id="coachForm">
+                <div class="grid-2cols">
+                    <div>
+                        <label>Téléacteur *</label>
+                        <select id="coach_agent" required>${buildAgentOptionsHtml()}</select>
+                    </div>
+                    <div>
+                        <label>Manager (superviseur) *</label>
+                        <input type="text" id="coach_manager" value="${escapeHtml(supervisorName)}" readonly>
+                    </div>
+                    <div><label>Campagne *</label><select id="coach_campagne" required>${optionsHtml}</select></div>
+                    <div><label>Date</label><input type="date" id="coach_date" value="${today}" readonly></div>
+                </div>
+                <div><label>Problématique</label><textarea id="coach_problematique" rows="2"></textarea></div>
+                <div><label>Cause racine</label><textarea id="coach_cause" rows="2"></textarea></div>
+                <div><label>Actions proposées</label><textarea id="coach_actions" rows="2"></textarea></div>
+                <div><label>🎯 Objectifs de travail fixés (par indicateur)</label>${buildObjectifsTravailWidgetHtml('coachObjTravailList')}</div>
+                <div class="grid-2cols">
+                    <div><label>Visa manager</label><input type="text" id="coach_visaManager" value="${escapeHtml(supervisorName)}" readonly></div>
+                    <div><label>Visa conseiller</label><input type="text" id="coach_visaConseiller" placeholder="Nom du conseiller"></div>
+                </div>
+                <button type="button" id="saveCoachBtn" style="margin-top:10px; background:#e8692c;"><i class="fas fa-save"></i> Enregistrer</button>
+                <button type="button" id="resetCoachBtn" class="secondary" style="margin-top:10px;">⟳ Réinitialiser</button>
+            </form>
+        </div>`;
+        document.body.appendChild(popup);
+
+        const getCoachObjRows = attachObjectifsTravailWidget('coachObjTravailList');
+
+        document.getElementById('closePopupBtn').onclick = function() { popup.remove(); popupOpen = false; };
+        popup.addEventListener('click', function(e) { if (e.target === popup) { popup.remove(); popupOpen = false; } });
+
+        document.getElementById('saveCoachBtn').onclick = function() {
+            saveCoachingData(getCoachObjRows());
+        };
+        document.getElementById('resetCoachBtn').onclick = function() {
+            document.getElementById('coachForm').reset();
+            document.getElementById('coach_date').value = new Date().toISOString().slice(0,10);
+            document.getElementById('coach_manager').value = escapeHtml(supervisorName);
+            document.getElementById('coach_visaManager').value = escapeHtml(supervisorName);
+        };
+    }
+
+    function saveCoachingData(objTravailRows) {
+        const agentId = document.getElementById('coach_agent').value;
+        const manager = document.getElementById('coach_manager').value;
+        const campagneId = document.getElementById('coach_campagne').value;
+        const problematique = document.getElementById('coach_problematique').value.trim();
+        const cause = document.getElementById('coach_cause').value.trim();
+        const actions = document.getElementById('coach_actions').value.trim();
+        const visaManager = document.getElementById('coach_visaManager').value.trim();
+        const visaConseiller = document.getElementById('coach_visaConseiller').value.trim();
+        const date = document.getElementById('coach_date').value;
+
+        if (!agentId || !manager || !campagneId) return alert("Agent, manager et campagne sont obligatoires.");
+        const agent = getAgentName(agentId);
+
+        const record = {
+            id: Date.now(),
+            agent,
+            agentId,
+            manager,
+            campagneId,
+            date,
+            problematique,
+            cause,
+            actions,
+            objectifsTravail: objTravailRows || [],
+            visaManager,
+            visaConseiller,
+            agentAck: { status: 'pending', date: null, comment: '' }
+        };
+        const all = getCoachings(); all.push(record); saveCoachings(all);
+        const popup = document.querySelector('.popup-modal');
+        if (popup) { popup.remove(); popupOpen = false; }
+        showPopup("Fiche coaching enregistrée", "✅ Succès");
+        render();
+    }
+
+    // ----- HISTORIQUES pour Attestations et Coachings -----
+    function renderHistoryAttest() {
+        const attestations = filterAttestations();
+        const campaigns = getCampaigns();
+        const campaignMap = {};
+        for (let i=0; i<campaigns.length; i++) campaignMap[campaigns[i].id] = campaigns[i].name;
+        let table = '<div class="table-responsive"><table><thead><tr><th>Date</th><th>Agent</th><th>Manager</th><th>Campagne</th><th>Indice appel</th><th>Écarts</th><th>Cause</th><th>Actions</th><th>Visa Manager</th><th>Visa Conseiller</th><th>Statut agent</th></tr></thead><tbody>';
+        if (attestations.length === 0) {
+            table += `<tr><td colspan="11" style="text-align:center; padding:20px; color:#8899aa;">Aucune attestation trouvée.</td></tr>`;
+        } else {
+            for (let i=0; i<attestations.length; i++) {
+                let r = attestations[i];
+                table += `<tr><td>${r.date}</td><td>${escapeHtml(r.agent)}</td><td>${escapeHtml(r.manager)}</td><td>${escapeHtml(campaignMap[r.campagneId] || r.campagneId || '')}</td><td>${escapeHtml(r.indice||'')}</td>
+                <td>${escapeHtml(r.ecarts||'')}</td><td>${escapeHtml(r.cause||'')}</td><td>${escapeHtml(r.actions||'')}</td>
+                <td>${escapeHtml(r.visaManager||'')}</td><td>${escapeHtml(r.visaConseiller||'')}</td><td>${agentAckBadge(r.agentAck)}</td></tr>`;
+            }
+        }
+        table += '</tbody></table></div>';
+        document.getElementById('dynamicView').innerHTML = `<div class="card"><h3>📋 Historique des Attestations</h3>${table}</div>`;
+    }
+
+    function renderHistoryCoach() {
+        const coachings = filterCoachings();
+        const campaigns = getCampaigns();
+        const campaignMap = {};
+        for (let i=0; i<campaigns.length; i++) campaignMap[campaigns[i].id] = campaigns[i].name;
+        let table = '<div class="table-responsive"><table><thead><tr><th>Date</th><th>Agent</th><th>Manager</th><th>Campagne</th><th>Problématique</th><th>Cause</th><th>Actions</th><th>Objectifs fixés</th><th>Suivi (dernière réalisation)</th><th>Visa Manager</th><th>Visa Conseiller</th><th>Statut agent</th></tr></thead><tbody>';
+        if (coachings.length === 0) {
+            table += `<tr><td colspan="12" style="text-align:center; padding:20px; color:#8899aa;">Aucune fiche coaching trouvée.</td></tr>`;
+        } else {
+            for (let i=0; i<coachings.length; i++) {
+                let r = coachings[i];
+                let objTxt = (r.objectifsTravail||[]).map(o => `${o.name}: ${formatIndicatorValue(o.target, o.type)}`).join(' | ');
+                let suiviTxt = computeSuiviTextForAgentObjectifs(r.agentId || r.agent, r.objectifsTravail);
+                table += `<tr><td>${r.date}</td><td>${escapeHtml(r.agent)}</td><td>${escapeHtml(r.manager)}</td><td>${escapeHtml(campaignMap[r.campagneId] || r.campagneId || '')}</td>
+                <td>${escapeHtml(r.problematique||'')}</td><td>${escapeHtml(r.cause||'')}</td><td>${escapeHtml(r.actions||'')}</td>
+                <td>${escapeHtml(objTxt||'—')}</td><td>${suiviTxt}</td><td>${escapeHtml(r.visaManager||'')}</td><td>${escapeHtml(r.visaConseiller||'')}</td><td>${agentAckBadge(r.agentAck)}</td></tr>`;
+            }
+        }
+        table += '</tbody></table></div>';
+        document.getElementById('dynamicView').innerHTML = `<div class="card"><h3>📋 Historique des Coachings</h3>${table}</div>`;
+    }
+
+    // Compare les objectifs fixés (coaching) à la dernière réalisation connue (dernier One-to-One de l'agent)
+    function computeSuiviTextForAgentObjectifs(agent, objectifsTravail) {
+        if (!objectifsTravail || !objectifsTravail.length) return '—';
+        const lastOne = getPreviousOne2OneFor(agent, null);
+        let parts = [];
+        for (let obj of objectifsTravail) {
+            let realisation = obj.key && lastOne ? computeRealisationFromOne2One(lastOne, obj.key) : null;
+            let status = computeObjectifStatus(obj.target, realisation);
+            let label = status === 'atteint' ? '✅' : status === 'depasse' ? '🚀' : status === 'nonAtteint' ? '❌' : '—';
+            parts.push(`${obj.name}: ${label}`);
+        }
+        return parts.join(' | ');
+    }
+
+    // ----- EXPORT EXCEL (.xls) - même disposition que les tableaux d'Historique -----
+    function renderDownloadPanel() {
+        const camps = getCampaigns();
+        let options = '<option value="">Toutes</option>';
+        for (let i=0; i<camps.length; i++) options += `<option value="${camps[i].id}">${camps[i].name}</option>`;
+        const container = document.getElementById('dynamicView');
+        container.innerHTML = `<div class="card"><h3>Export Excel</h3><select id="dlCampaign">${options}</select>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+            <button id="dlOneBtn">One-to-One</button>
+            <button id="dlEvalBtn">Évaluations</button>
+            <button id="dlAttestBtn">Attestations</button>
+            <button id="dlCoachBtn">Coachings</button>
+        </div></div>`;
+        document.getElementById('dlOneBtn').onclick = function() {
+            let campId = document.getElementById('dlCampaign').value;
+            let data = filterOne2One();
+            if (campId) data = data.filter(r => r.campagneId === campId);
+            exportExcelOne(data, 'historique_one_to_one.xls');
+        };
+        document.getElementById('dlEvalBtn').onclick = function() {
+            let campId = document.getElementById('dlCampaign').value;
+            let data = filterEvaluations();
+            if (campId) data = data.filter(r => r.campagneId === campId);
+            exportExcelEval(data, 'historique_evaluations.xls');
+        };
+        document.getElementById('dlAttestBtn').onclick = function() {
+            let campId = document.getElementById('dlCampaign').value;
+            let data = filterAttestations();
+            if (campId) data = data.filter(r => r.campagneId === campId);
+            exportExcelAttest(data, 'historique_attestations.xls');
+        };
+        document.getElementById('dlCoachBtn').onclick = function() {
+            let campId = document.getElementById('dlCampaign').value;
+            let data = filterCoachings();
+            if (campId) data = data.filter(r => r.campagneId === campId);
+            exportExcelCoach(data, 'historique_coachings.xls');
+        };
+    }
+
+    // Fonction générique d'export Excel (.xls) : génère un tableau HTML lisible nativement par Excel,
+    // avec exactement la même disposition (en-têtes et colonnes) que les tableaux d'Historique affichés à l'écran.
+    function exportToExcel(headers, rows, filename, title) {
+        if (!rows.length) { alert("Aucune donnée à exporter"); return; }
+        let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+        html += '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
+        html += '<x:Name>' + escapeHtml(title || 'Export') + '</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>';
+        html += '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>';
+        html += '<table border="1"><thead><tr>';
+        for (let i=0; i<headers.length; i++) html += `<th>${escapeHtml(headers[i])}</th>`;
+        html += '</tr></thead><tbody>';
+        for (let i=0; i<rows.length; i++) {
+            html += '<tr>';
+            for (let j=0; j<rows[i].length; j++) html += `<td>${escapeHtml(String(rows[i][j] === undefined || rows[i][j] === null ? '' : rows[i][j]))}</td>`;
+            html += '</tr>';
+        }
+        html += '</tbody></table></body></html>';
+        const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    }
+
+    // Export One-to-One : mêmes colonnes que "Historique One-to-One"
+    function exportExcelOne(data, filename) {
+        const campaigns = getCampaigns();
+        const campaignMap = {};
+        for (let i=0; i<campaigns.length; i++) campaignMap[campaigns[i].id] = campaigns[i].name;
+        const headers = ['Date','Téléacteur','Manager','Campagne','CU','Promesses','DEL','PEL','Points forts','Axes amélioration','Flash','Objectifs S+1 fixés','Suivi objectifs précédents','Statut agent'];
+        const rows = [];
+        for (let i=0; i<data.length; i++) {
+            let r = data[i];
+            let objTxt = (r.objectifsTravail||[]).map(o => `${o.name}: ${formatIndicatorValue(o.target, o.type)}`).join(' | ');
+            let suiviTxt = (r.suiviObjectifs||[]).map(o => `${o.name}: ${o.statusLabel}`).join(' | ');
+            rows.push([
+                r.date, r.teleacteur, r.manager||'', campaignMap[r.campagneId] || r.campagneId,
+                r.cuVolume, r.promessesCount||0, r.delCount||0, r.pelCount||0,
+                (r.pointsForts||[]).join(', '), (r.axesAmelioration||[]).join(', '),
+                r.flash||'', objTxt, suiviTxt, r.agentAck ? r.agentAck.status : 'pending'
+            ]);
+        }
+        exportToExcel(headers, rows, filename, 'Historique One-to-One');
+    }
+
+    // Export Évaluations : mêmes colonnes que "Historique des évaluations"
+    function exportExcelEval(data, filename) {
+        const campaigns = getCampaigns();
+        const campaignMap = {};
+        for (let i=0; i<campaigns.length; i++) campaignMap[campaigns[i].id] = campaigns[i].name;
+        const columnOrder = EVAL_ITEMS.map(item => item.name);
+        const headers = ['Date','Téléacteur','Manager','Campagne','Score', ...columnOrder];
+        const rows = [];
+        for (let i=0; i<data.length; i++) {
+            let e = data[i];
+            let results = {};
+            for (let j=0; j<e.criteriaResults.length; j++) results[e.criteriaResults[j].item] = e.criteriaResults[j].result;
+            let row = [e.date, e.teleacteur, e.manager||'', campaignMap[e.campagneId] || e.campagneId, e.score + '%'];
+            for (let j=0; j<columnOrder.length; j++) row.push(results[columnOrder[j]] || '—');
+            rows.push(row);
+        }
+        exportToExcel(headers, rows, filename, 'Historique Évaluations');
+    }
+
+    // Export Attestations : mêmes colonnes que "Historique des Attestations"
+    function exportExcelAttest(data, filename) {
+        const campaigns = getCampaigns();
+        const campaignMap = {};
+        for (let i=0; i<campaigns.length; i++) campaignMap[campaigns[i].id] = campaigns[i].name;
+        const headers = ['Date','Agent','Manager','Campagne','Indice appel','Écarts','Cause','Actions','Visa Manager','Visa Conseiller','Statut agent'];
+        const rows = [];
+        for (let i=0; i<data.length; i++) {
+            let r = data[i];
+            rows.push([
+                r.date, r.agent, r.manager, campaignMap[r.campagneId] || r.campagneId || '',
+                r.indice||'', r.ecarts||'', r.cause||'', r.actions||'', r.visaManager||'', r.visaConseiller||'', r.agentAck ? r.agentAck.status : 'pending'
+            ]);
+        }
+        exportToExcel(headers, rows, filename, 'Historique Attestations');
+    }
+
+    // Export Coachings : mêmes colonnes que "Historique des Coachings"
+    function exportExcelCoach(data, filename) {
+        const campaigns = getCampaigns();
+        const campaignMap = {};
+        for (let i=0; i<campaigns.length; i++) campaignMap[campaigns[i].id] = campaigns[i].name;
+        const headers = ['Date','Agent','Manager','Campagne','Problématique','Cause','Actions','Objectifs fixés','Suivi (dernière réalisation)','Visa Manager','Visa Conseiller','Statut agent'];
+        const rows = [];
+        for (let i=0; i<data.length; i++) {
+            let r = data[i];
+            let objTxt = (r.objectifsTravail||[]).map(o => `${o.name}: ${formatIndicatorValue(o.target, o.type)}`).join(' | ');
+            let suiviTxt = computeSuiviTextForAgentObjectifs(r.agentId || r.agent, r.objectifsTravail);
+            rows.push([
+                r.date, r.agent, r.manager, campaignMap[r.campagneId] || r.campagneId || '',
+                r.problematique||'', r.cause||'', r.actions||'', objTxt, suiviTxt, r.visaManager||'', r.visaConseiller||'', r.agentAck ? r.agentAck.status : 'pending'
+            ]);
+        }
+        exportToExcel(headers, rows, filename, 'Historique Coachings');
+    }
+
+    // ----- SUPPRESSION HISTORIQUES (admin) - ajout des nouvelles rubriques -----
+    function renderDeleteHistoryPopup() {
+        if (popupOpen) return;
+        popupOpen = true;
+        const campaigns = getCampaigns();
+        let optionsHtml = '<option value="">Toutes les campagnes</option>';
+        for (let i=0; i<campaigns.length; i++) optionsHtml += `<option value="${campaigns[i].id}">${campaigns[i].name}</option>`;
+        const popup = document.createElement('div');
+        popup.className = 'popup-modal';
+        popup.innerHTML = `<div class="popup-card">
+            <button class="close-popup" id="closePopupBtn">&times;</button>
+            <h2><i class="fas fa-trash-alt"></i> Supprimer les historiques</h2>
+            <p style="margin-bottom:16px; color:#666;">Cette action est irréversible.</p>
+            <div class="delete-option"><h4>📋 Supprimer par campagne</h4><select id="deleteCampaignSelect" style="margin:8px 0;">${optionsHtml}</select>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button id="deleteOneByCamp" class="danger" style="background:#b33c1a;">Supprimer One-to-One</button>
+                    <button id="deleteEvalByCamp" class="danger" style="background:#b33c1a;">Supprimer Évaluations</button>
+                    <button id="deleteAttestByCamp" class="danger" style="background:#b33c1a;">Supprimer Attestations</button>
+                    <button id="deleteCoachByCamp" class="danger" style="background:#b33c1a;">Supprimer Coachings</button>
+                </div></div>
+            <hr>
+            <div class="delete-option" style="border-left-color:#b33c1a; background:#fde8e8;"><h4 style="color:#b33c1a;">⚠️ Suppression globale</h4>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+                    <button id="deleteAllOne" class="danger" style="background:#b33c1a;">Supprimer TOUS les One-to-One</button>
+                    <button id="deleteAllEval" class="danger" style="background:#b33c1a;">Supprimer TOUTES les Évaluations</button>
+                    <button id="deleteAllAttest" class="danger" style="background:#b33c1a;">Supprimer TOUTES les Attestations</button>
+                    <button id="deleteAllCoach" class="danger" style="background:#b33c1a;">Supprimer TOUS les Coachings</button>
+                    <button id="deleteAll" class="danger" style="background:#8b0000;">🔥 Supprimer TOUT</button>
+                </div></div>
+        </div>`;
+        document.body.appendChild(popup);
+        document.getElementById('closePopupBtn').onclick = function() { popup.remove(); popupOpen = false; };
+        popup.addEventListener('click', function(e) { if (e.target === popup) { popup.remove(); popupOpen = false; } });
+
+        document.getElementById('deleteOneByCamp').onclick = function() {
+            const campId = document.getElementById('deleteCampaignSelect').value;
+            if (!campId) { alert("Veuillez sélectionner une campagne"); return; }
+            if (confirm(`Supprimer tous les One-to-One pour la campagne sélectionnée ?`)) {
+                const current = getOne2One();
+                saveOne2One(current.filter(r => r.campagneId !== campId));
+                alert("One-to-One supprimés pour cette campagne");
+                popup.remove(); popupOpen = false; render();
+            }
+        };
+        document.getElementById('deleteEvalByCamp').onclick = function() {
+            const campId = document.getElementById('deleteCampaignSelect').value;
+            if (!campId) { alert("Veuillez sélectionner une campagne"); return; }
+            if (confirm(`Supprimer toutes les Évaluations pour la campagne sélectionnée ?`)) {
+                const current = getEvaluations();
+                saveEvaluations(current.filter(r => r.campagneId !== campId));
+                alert("Évaluations supprimées pour cette campagne");
+                popup.remove(); popupOpen = false; render();
+            }
+        };
+        document.getElementById('deleteAttestByCamp').onclick = function() {
+            const campId = document.getElementById('deleteCampaignSelect').value;
+            if (!campId) { alert("Veuillez sélectionner une campagne"); return; }
+            if (confirm(`Supprimer toutes les Attestations pour la campagne sélectionnée ?`)) {
+                const current = getAttestations();
+                saveAttestations(current.filter(r => r.campagneId !== campId));
+                alert("Attestations supprimées pour cette campagne");
+                popup.remove(); popupOpen = false; render();
+            }
+        };
+        document.getElementById('deleteCoachByCamp').onclick = function() {
+            const campId = document.getElementById('deleteCampaignSelect').value;
+            if (!campId) { alert("Veuillez sélectionner une campagne"); return; }
+            if (confirm(`Supprimer toutes les Fiches Coaching pour la campagne sélectionnée ?`)) {
+                const current = getCoachings();
+                saveCoachings(current.filter(r => r.campagneId !== campId));
+                alert("Fiches coaching supprimées pour cette campagne");
+                popup.remove(); popupOpen = false; render();
+            }
+        };
+        document.getElementById('deleteAllOne').onclick = function() {
+            if (confirm("⚠️ Supprimer TOUS les enregistrements One-to-One ?")) { saveOne2One([]); alert("Tous les One-to-One ont été supprimés"); popup.remove(); popupOpen = false; render(); }
+        };
+        document.getElementById('deleteAllEval').onclick = function() {
+            if (confirm("⚠️ Supprimer TOUTES les Évaluations ?")) { saveEvaluations([]); alert("Toutes les Évaluations ont été supprimées"); popup.remove(); popupOpen = false; render(); }
+        };
+        document.getElementById('deleteAllAttest').onclick = function() {
+            if (confirm("⚠️ Supprimer TOUTES les Attestations ?")) { saveAttestations([]); alert("Toutes les Attestations ont été supprimées"); popup.remove(); popupOpen = false; render(); }
+        };
+        document.getElementById('deleteAllCoach').onclick = function() {
+            if (confirm("⚠️ Supprimer TOUS les Coachings ?")) { saveCoachings([]); alert("Tous les Coachings ont été supprimés"); popup.remove(); popupOpen = false; render(); }
+        };
+        document.getElementById('deleteAll').onclick = function() {
+            if (confirm("🔥 Supprimer TOUS les enregistrements ?")) { saveOne2One([]); saveEvaluations([]); saveAttestations([]); saveCoachings([]); alert("Tous les historiques ont été supprimés"); popup.remove(); popupOpen = false; render(); }
+        };
+    }
+
+    // ----- AUTRES FONCTIONS (inchangées ou adaptées) -----
+    // (Les fonctions renderUserManagement, renderAssignCampaignsMatrix, renderAdminSettings, renderAideComplete, getUserCampaigns sont identiques à l'original)
+    // Je les inclus pour complétude, mais elles restent inchangées.
+
+    function renderUserManagement() {
+        const refresh = function() {
+            const all = getUsers();
+            const listDiv = document.getElementById('userList');
+            if (!listDiv) return;
+            let html = '';
+            const roleLabel = { admin: 'Admin', manager: 'Manager', agent: 'Agent' };
+            for (let i=0; i<all.length; i++) {
+                let u = all[i];
+                html += `<li style="margin:8px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                    <span>${escapeHtml(u.fullName)} (${escapeHtml(u.username)}) - <span class="badge">${roleLabel[u.role]||u.role}</span></span>
+                    <span style="display:flex; gap:6px; align-items:center;">
+                        ${u.role === 'agent' ? `<select class="relink-agent-select" data-uid="${u.id}" style="font-size:11px; padding:2px 6px;">${buildAgentOptionsHtml(u.agentId)}</select>
+                        <button class="relink-agent-btn" data-uid="${u.id}" style="padding:2px 10px; font-size:11px; background:#0d7a5f;">🔗 Lier</button>` : ''}
+                        ${u.role !== 'admin' ? `<button class="danger delete-user-btn" data-id="${u.id}" style="padding:2px 10px; font-size:11px;">Supprimer</button>` : ''}
+                    </span>
+                </li>`;
+            }
+            listDiv.innerHTML = html;
+            document.querySelectorAll('.delete-user-btn').forEach(btn => btn.onclick = function() {
+                if (confirm("Supprimer ?")) {
+                    const uid = this.getAttribute('data-id');
+                    const userToDelete = getUsers().find(u => u.id === uid);
+                    saveUsers(getUsers().filter(u => u.id !== uid));
+                    // Note : l'agent lié n'est pas supprimé automatiquement ici (il peut être relié à un autre compte).
+                    refresh();
+                }
+            });
+            document.querySelectorAll('.relink-agent-btn').forEach(btn => btn.onclick = function() {
+                const uid = this.getAttribute('data-uid');
+                const sel = document.querySelector(`.relink-agent-select[data-uid="${uid}"]`);
+                if (!sel.value) return alert("Choisissez un agent");
+                if (relinkAgentAccount(uid, sel.value)) { alert("Compte relié à l'agent sélectionné."); refresh(); }
+                else alert("Erreur lors de la liaison.");
+            });
+        };
+        const container = document.getElementById('dynamicView');
+        const unlinkedAgents = getAgents().filter(a => !getUsers().find(u => u.role==='agent' && u.agentId===a.id));
+        container.innerHTML = `<div class="card"><h3>👥 Gestion utilisateurs</h3>
+        <p style="color:#666; margin-bottom:8px;">Un compte <strong>Manager</strong> a accès à toutes les rubriques opérationnelles (One-to-One, Coaching, Attestation, Grille, Historiques, Export, Bilan). Un compte <strong>Agent</strong> ne voit que ses propres fiches (avec possibilité d'attester/signer) et son bilan personnel. En cas d'homonymie entre deux agents, utilisez "Lier à un agent existant" pour rattacher précisément le bon compte au bon agent, et le bouton 🔗 Lier ci-dessous pour corriger une liaison à tout moment.</p>
+        <div class="grid-2cols" style="margin-bottom:8px;">
+            <div><label>Login</label><input id="newUsername" placeholder="Login"></div>
+            <div><label>Mot de passe (auto si vide)</label><input id="newPassword" placeholder="Mdp"></div>
+            <div><label>Rôle</label><select id="newRole"><option value="manager">Manager</option><option value="agent">Agent</option></select></div>
+            <div id="newRoleAgentModeDiv" style="display:none;"><label>Agent</label><select id="newRoleAgentMode"><option value="new">Créer un nouvel agent</option><option value="existing">Lier à un agent existant</option></select></div>
+        </div>
+        <div id="newFullnameDiv"><label>Nom complet</label><input id="newFullname" placeholder="Nom et prénom"></div>
+        <div id="existingAgentDiv" style="display:none; margin-top:6px;"><label>Agent existant sans compte</label><select id="existingAgentSelect">${unlinkedAgents.map(a=>`<option value="${a.id}">${escapeHtml(a.name)}</option>`).join('') || '<option value="">Aucun agent sans compte</option>'}</select></div>
+        <button id="createUserBtn" style="margin-top:10px;">Créer le compte</button>
+        <hr><ul id="userList"></ul></div>`;
+
+        const roleSelect = document.getElementById('newRole');
+        const agentModeSelect = document.getElementById('newRoleAgentMode');
+        const agentModeDiv = document.getElementById('newRoleAgentModeDiv');
+        const fullnameDiv = document.getElementById('newFullnameDiv');
+        const existingAgentDiv = document.getElementById('existingAgentDiv');
+        const updateFormMode = function() {
+            agentModeDiv.style.display = roleSelect.value === 'agent' ? 'block' : 'none';
+            if (roleSelect.value === 'agent' && agentModeSelect.value === 'existing') {
+                fullnameDiv.style.display = 'none'; existingAgentDiv.style.display = 'block';
+            } else {
+                fullnameDiv.style.display = 'block'; existingAgentDiv.style.display = 'none';
+            }
+        };
+        roleSelect.onchange = updateFormMode;
+        agentModeSelect.onchange = updateFormMode;
+        updateFormMode();
+
+        document.getElementById('createUserBtn').onclick = function() {
+            const username = document.getElementById('newUsername').value.trim();
+            const full = document.getElementById('newFullname').value.trim();
+            let pwd = document.getElementById('newPassword').value.trim();
+            const role = document.getElementById('newRole').value;
+            if (!username) return alert("Login requis");
+            if (!pwd) pwd = Math.random().toString(36).slice(2,8);
+            const usersNow = getUsers();
+            if (usersNow.find(u => u.username === username)) return alert("Existe déjà");
+            if (role === 'agent') {
+                const mode = document.getElementById('newRoleAgentMode').value;
+                if (mode === 'existing') {
+                    const existingId = document.getElementById('existingAgentSelect').value;
+                    if (!existingId) return alert("Sélectionnez un agent existant");
+                    const res = createAgentAccount(null, username, pwd, existingId);
+                    if (!res.ok) return alert(res.msg);
+                    alert(`Compte créé et lié à l'agent existant: ${res.username} (mdp: ${res.password}).`);
+                } else {
+                    if (!full) return alert("Nom requis");
+                    const res = createAgentAccount(full, username, pwd);
+                    if (!res.ok) return alert(res.msg);
+                    alert(`Compte Agent créé: ${res.username} (mdp: ${res.password}). Cet agent apparaît désormais dans la liste des agents.`);
+                }
+            } else {
+                usersNow.push({ id: 'u'+Date.now(), username, password: pwd, role: 'manager', fullName: full });
+                saveUsers(usersNow);
+                alert(`Compte Manager créé: ${username} (mdp: ${pwd})`);
+            }
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newFullname').value = '';
+            document.getElementById('newPassword').value = '';
+            renderUserManagement();
+        };
+        refresh();
+    }
+
+    function renderAssignCampaignsMatrix() {
+        const users = getUsers().filter(u => u.role === 'manager');
+        const campaigns = getCampaigns();
+        const assignments = getAssignments();
+        let html = `<div class="card"><h3>Affectation des campagnes</h3>
+        <div class="table-responsive"><table class="matrix-table">`;
+        html += '<thead><tr><th>Téléacteur</th>';
+        for (let i=0; i<campaigns.length; i++) html += `<th>${escapeHtml(campaigns[i].name)}</th>`;
+        html += '</tr></thead><tbody>';
+        for (let i=0; i<users.length; i++) {
+            let user = users[i];
+            let userCampIds = assignments[user.id] || [];
+            html += `<tr><td><strong>${escapeHtml(user.fullName)}</strong></td>`;
+            for (let j=0; j<campaigns.length; j++) {
+                let camp = campaigns[j];
+                let checked = userCampIds.includes(camp.id);
+                html += `<td><input type="checkbox" class="assign-check" data-user="${user.id}" data-camp="${camp.id}" ${checked ? 'checked' : ''}></td>`;
+            }
+            html += '</tr>';
+        }
+        html += `</tbody></table></div><button id="saveMatrixBtn" style="margin-top:10px;">Enregistrer</button></div>`;
+        const container = document.getElementById('dynamicView');
+        container.innerHTML = html;
+        document.getElementById('saveMatrixBtn').onclick = function() {
+            const assignMap = getAssignments();
+            document.querySelectorAll('.assign-check').forEach(cb => {
+                let uid = cb.getAttribute('data-user');
+                let cid = cb.getAttribute('data-camp');
+                if (!assignMap[uid]) assignMap[uid] = [];
+                if (cb.checked) { if (!assignMap[uid].includes(cid)) assignMap[uid].push(cid); }
+                else { assignMap[uid] = assignMap[uid].filter(c => c !== cid); }
+            });
+            saveAssignments(assignMap);
+            alert("Affectations mises à jour");
+        };
+    }
+
+    function renderAdminSettings() {
+        const settings = getSettings();
+        const indicators = settings.indicators || [];
+        const container = document.getElementById('dynamicView');
+        let rowsHtml = '';
+        for (let i=0; i<indicators.length; i++) {
+            let ind = indicators[i];
+            rowsHtml += `<div class="dynamic-list-item">
+                <input type="text" class="ind-name" data-idx="${i}" value="${escapeHtml(ind.name)}" ${ind.builtin ? '' : ''} style="flex:2; padding:6px 10px; border:1px solid #cbdde9; border-radius:14px;">
+                <select class="ind-type" data-idx="${i}" style="flex:1;">
+                    <option value="quantity" ${ind.type==='quantity'?'selected':''}>Quantité / Nombre</option>
+                    <option value="percentage" ${ind.type==='percentage'?'selected':''}>Pourcentage (%)</option>
+                </select>
+                <input type="number" class="ind-target" data-idx="${i}" value="${ind.target}" step="0.1" style="flex:1; padding:6px 10px; border:1px solid #cbdde9; border-radius:14px;">
+                ${ind.builtin ? '<span class="badge" style="background:#eef2ff;">Indicateur de base</span>' : `<button type="button" class="delete-indicator" data-idx="${i}" style="background:#e8692c; padding:4px 10px; font-size:11px; border-radius:20px;">✖</button>`}
+            </div>`;
+        }
+        container.innerHTML = `<div class="card"><h3>⚙️ Objectifs (cibles contractuelles par indicateur)</h3>
+        <p style="color:#666; margin-bottom:10px;">Ces cibles sont les objectifs contractuels. Elles servent de valeur par défaut lors de la fixation des "objectifs de travail" dans les fiches One-to-One et Coaching.</p>
+        <div style="display:flex; gap:10px; font-size:11px; font-weight:600; color:#8899aa; margin-bottom:4px;"><span style="flex:2;">Nom de l'indicateur</span><span style="flex:1;">Type</span><span style="flex:1;">Cible</span></div>
+        <div id="indicatorsList">${rowsHtml}</div>
+        <button id="addIndicatorBtn" class="secondary" style="margin-top:10px; padding:4px 14px; font-size:11px;">+ Ajouter un indicateur</button>
+        <hr><button id="saveSettingsBtn" style="margin-top:6px;">Enregistrer tous les objectifs</button></div>`;
+
+        document.getElementById('addIndicatorBtn').onclick = function() {
+            const settingsNow = getSettings();
+            if (!settingsNow.indicators) settingsNow.indicators = [];
+            settingsNow.indicators.push({ id: 'ind_custom_'+Date.now(), key: null, name: "Nouvel indicateur", type: 'quantity', target: 0, builtin: false });
+            saveSettings(settingsNow);
+            renderAdminSettings();
+        };
+        document.querySelectorAll('.delete-indicator').forEach(btn => { btn.onclick = function() {
+            let idx = parseInt(this.getAttribute('data-idx'));
+            const settingsNow = getSettings();
+            if (settingsNow.indicators && settingsNow.indicators.length > idx && !settingsNow.indicators[idx].builtin) {
+                settingsNow.indicators.splice(idx, 1);
+                saveSettings(settingsNow);
+                renderAdminSettings();
+            }
+        }; });
+        document.getElementById('saveSettingsBtn').onclick = function() {
+            const settingsNow = getSettings();
+            const nameInputs = document.querySelectorAll('.ind-name');
+            const typeInputs = document.querySelectorAll('.ind-type');
+            const targetInputs = document.querySelectorAll('.ind-target');
+            for (let i=0; i<settingsNow.indicators.length; i++) {
+                settingsNow.indicators[i].name = nameInputs[i].value || settingsNow.indicators[i].name;
+                settingsNow.indicators[i].type = typeInputs[i].value;
+                settingsNow.indicators[i].target = parseFloat(targetInputs[i].value) || 0;
+            }
+            saveSettings(settingsNow);
+            alert("Objectifs mis à jour");
+            renderAdminSettings();
+        };
+    }
+
+    function getUserCampaigns() {
+        if (currentUser.role === 'admin') return getCampaigns();
+        const assign = getAssignments();
+        const userCampIds = assign[currentUser.id] || [];
+        const allCamps = getCampaigns();
+        let filtered = [];
+        for (let i=0; i<allCamps.length; i++) if (userCampIds.includes(allCamps[i].id)) filtered.push(allCamps[i]);
+        return filtered;
+    }
+
+    function renderAideComplete() {
+        const ad = isAdmin(), mgr = isManager(), ag = isAgent();
+        const campaigns = getCampaigns();
+        let campaignsHtml = '';
+        for (let i=0; i<campaigns.length; i++) {
+            let c = campaigns[i];
+            campaignsHtml += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span>${escapeHtml(c.name)} (${c.type})</span>
+                ${ad ? `<button class="delete-campaign-btn" data-id="${c.id}" style="background:#e8692c; padding:2px 10px; font-size:11px;">Supprimer</button>` : ''}
+            </li>`;
+        }
+
+        const managerGuide = `
+            <div class="guide-step"><strong>🏠 Tableau de bord :</strong> vue d'ensemble avec statistiques et accès rapide (tuiles) à toutes les rubriques disponibles selon votre rôle.</div>
+            <div class="guide-step"><strong>📅 One-to-One :</strong> saisie hebdomadaire par agent/campagne. La date et le manager sont automatiques. Les champs de réalisation (Promesses/DEL pour PRP, PEL pour PPA) s'adaptent au type de campagne. Vous devez choisir 1 à 3 points forts et 1 à 3 axes d'amélioration. Le formulaire affiche aussi le suivi des objectifs fixés lors du one-to-one précédent (atteint / non atteint / dépassé) et vous permet de fixer de nouveaux objectifs de travail par indicateur pour la période suivante.</div>
+            <div class="guide-step"><strong>📋 Grille d'évaluation :</strong> 10 items notés OK/KO/NA avec observation libre ; le score qualité (%) est calculé automatiquement (OK / (OK+KO)).</div>
+            <div class="guide-step"><strong>✍️ Attestation Débrief :</strong> écarts observés, cause racine, actions, avec visa manager automatique. L'agent concerné peut ensuite l'attester électroniquement (signature) ou la refuser depuis son propre espace.</div>
+            <div class="guide-step"><strong>🧑‍🏫 Fiche Coaching :</strong> problématique, cause racine, actions et objectifs de travail par indicateur, avec le même mécanisme de signature électronique côté agent.</div>
+            <div class="guide-step"><strong>🎯 Objectifs de travail par indicateur :</strong> dans le One-to-One et la Fiche Coaching, vous choisissez un ou plusieurs indicateurs (bouton "+ Ajouter un indicateur" ou "+ Tous les indicateurs") et fixez la cible de travail de l'agent pour chacun. Cette cible est distincte de la cible contractuelle définie dans "Objectifs" : elle représente l'objectif que vous fixez personnellement à l'agent pour la période à venir. Dès la prochaine saisie, l'application compare automatiquement la réalisation constatée à cet objectif et affiche un statut : ✅ Atteint, 🚀 Dépassé ou ❌ Non atteint.</div>
+            <div class="guide-step"><strong>👥 Agents :</strong> chaque agent est rattaché à un compte de connexion (créé par l'admin). Il apparaît automatiquement dans les listes déroulantes des formulaires One-to-One, Grille, Attestation et Coaching.</div>
+            <div class="guide-step"><strong>🗂️ Historiques :</strong> regroupés en sous-menu (One-to-One, Évaluations, Attestations, Coachings) accessibles depuis une seule tuile "Historiques".</div>
+            <div class="guide-step"><strong>📊 Bilan & Suivi :</strong> indicateurs clés, évolution du score qualité, répartition OK/KO par item, fréquence des axes d'amélioration et points forts, suivi des signatures électroniques, et détection des récidives (un même axe d'amélioration qui revient plusieurs fois pour un même agent).</div>
+            <div class="guide-step"><strong>📥 Export Excel :</strong> chaque historique peut être exporté au format .xls, avec exactement les mêmes colonnes que le tableau affiché à l'écran, filtrable par campagne.</div>`;
+
+        const agentGuide = `
+            <div class="guide-step"><strong>🏠 Tableau de bord :</strong> accès à vos fiches personnelles et à votre bilan.</div>
+            <div class="guide-step"><strong>📅 Mes One-to-One / 🧑‍🏫 Mes Coachings / ✍️ Mes Attestations :</strong> vous consultez les fiches renseignées par votre manager à votre sujet. Tant qu'une fiche n'a pas été traitée, elle est marquée "⏳ En attente". Vous pouvez alors :<br>
+            &nbsp;&nbsp;• <strong>Attester / Signer</strong> : vous confirmez avoir pris connaissance du contenu et être en phase avec les actions convenues (équivalent d'une signature électronique) ;<br>
+            &nbsp;&nbsp;• <strong>Refuser / Contester</strong> : si vous n'êtes pas d'accord, en précisant le motif. Votre manager voit alors ce refus dans son historique et son bilan.</div>
+            <div class="guide-step"><strong>📋 Ma grille d'évaluation :</strong> vous voyez uniquement votre note qualité, le détail des items OK/KO de votre dernière évaluation, et l'évolution de votre score dans le temps (graphique).</div>
+            <div class="guide-step"><strong>📊 Mon bilan :</strong> vos propres indicateurs, l'évolution de votre score, vos axes d'amélioration récurrents, pour mieux travailler sur vous-même.</div>`;
+
+        const adminGuide = `
+            <div class="guide-step"><strong>👑 Rôles :</strong> <strong>Admin</strong> a accès à tout. <strong>Manager</strong> a accès à toutes les rubriques opérationnelles (One-to-One, Coaching, Attestation débrief, Grille, Historiques, Bilan, Export) mais pas à la Gestion utilisateurs/agents, à l'Affectation des campagnes, aux Objectifs ni à la Suppression des historiques. <strong>Agent</strong> ne voit que ses propres fiches (One-to-One, Coaching, Attestation) avec possibilité d'attester ou de refuser, sa grille d'évaluation (lecture seule) et son bilan personnel.</div>
+            <div class="guide-step"><strong>👥 Gestion utilisateurs :</strong> création de comptes Manager ou Agent. Un compte Agent est automatiquement rattaché à la liste des agents et apparaît dans les formulaires de saisie.</div>
+            <div class="guide-step"><strong>🧑‍🤝‍🧑 Gestion agents :</strong> ajouter un agent revient à créer directement son compte de connexion (rôle Agent).</div>
+            <div class="guide-step"><strong>🏷️ Affecter campagnes :</strong> associer chaque Manager aux campagnes sur lesquelles il peut saisir des fiches.</div>
+            <div class="guide-step"><strong>⚙️ Objectifs :</strong> définir, pour chaque indicateur (CU/H, Promesse/CU, DEL/CU, PEL/CU ou indicateurs personnalisés), son type (Quantité/Nombre ou Pourcentage) et sa cible contractuelle. Ces cibles servent de valeur par défaut lors de la fixation des objectifs de travail dans le One-to-One et le Coaching.</div>
+            <div class="guide-step"><strong>🗑️ Supprimer historiques :</strong> suppression ciblée par campagne ou suppression globale (irréversible) pour chaque rubrique : One-to-One, Évaluations, Attestations débrief, Fiches Coaching.</div>`;
+
+        const html = `<div class="card"><h3><i class="fas fa-book-open"></i> Centre d'aide</h3>
+            <div class="bibliotheque-script"><h4>📘 Guide d'utilisation</h4>
+                ${!ag ? managerGuide : ''}
+                ${ag ? agentGuide : ''}
+                ${ad ? adminGuide : ''}
+            </div>
+            <div><h4>📋 Campagnes</h4><ul>${campaignsHtml}</ul></div>
+            ${ad ? `<hr><div class="card" style="margin-top:12px;"><h4><i class="fas fa-cogs"></i> Administration</h4>
+            <p style="color:#666; margin-bottom:10px;">En tant qu'admin, vous gérez : les <strong>Utilisateurs</strong> (comptes Manager / Agent), les <strong>Agents</strong> (liste rattachée à des comptes), l'<strong>Affectation des campagnes</strong>, les <strong>Objectifs</strong> par indicateur, ainsi que la <strong>Suppression des historiques</strong> (One-to-One, Évaluations, <strong>Attestations débrief</strong> et <strong>Fiches Coaching</strong>). Les campagnes se gèrent ci-dessous.</p>
+            <div style="margin-bottom:10px;"><h5>➕ Ajouter une campagne</h5>
+                <input type="text" id="newCampName" placeholder="Nom" style="width:150px; display:inline-block; margin-right:6px;">
+                <select id="newCampType" style="width:80px; display:inline-block; margin-right:6px;">
+                    <option value="PRP">PRP</option><option value="PPA">PPA</option>
+                </select>
+                <button id="addCampaignBtn">Ajouter</button>
+            </div>
+            <button id="refreshAideBtn" style="margin-top:8px; background:#0d7a5f; padding:4px 14px; font-size:11px;"><i class="fas fa-sync-alt"></i> Actualiser</button></div>` : ''}
+        </div>`;
+        document.getElementById('dynamicView').innerHTML = html;
+        if (ad) {
+            document.getElementById('addCampaignBtn')?.addEventListener('click', () => {
+                const name = document.getElementById('newCampName').value.trim();
+                const type = document.getElementById('newCampType').value;
+                if (!name) return alert("Nom requis");
+                const camps = getCampaigns();
+                const newId = 'camp' + Date.now();
+                camps.push({ id: newId, name, type });
+                saveCampaigns(camps);
+                const assign = getAssignments();
+                const users = getUsers();
+                for (let u of users) if (u.role === 'manager') { if (!assign[u.id]) assign[u.id] = []; assign[u.id].push(newId); }
+                saveAssignments(assign);
+                renderAideComplete();
+            });
+            document.querySelectorAll('.delete-campaign-btn').forEach(btn => { btn.onclick = () => {
+                const id = btn.getAttribute('data-id');
+                if (confirm("Supprimer cette campagne ?")) { saveCampaigns(getCampaigns().filter(c => c.id !== id)); renderAideComplete(); }
+            }; });
+            document.getElementById('refreshAideBtn')?.addEventListener('click', () => renderAideComplete());
+        }
+    }
+
+    // ----- POPUP One-to-One (inchangé) -----
+    function openOneToOnePopup() {
+        if (popupOpen) return;
+        popupOpen = true;
+        const camps = getUserCampaigns();
+        const today = new Date().toISOString().slice(0,10);
+        const supervisorName = currentUser.fullName;
+
+        let optionsHtml = '';
+        for (let i=0; i<camps.length; i++) optionsHtml += `<option value="${camps[i].id}" data-type="${camps[i].type}">${camps[i].name}</option>`;
+
+        const popup = document.createElement('div');
+        popup.className = 'popup-modal';
+        popup.innerHTML = `<div class="popup-card">
+            <button class="close-popup" id="closePopupBtn">&times;</button>
+            <h2><i class="fas fa-calendar-week"></i> One-to-One Hebdomadaire</h2>
+            <form id="one2oneForm">
+                <div class="grid-2cols">
+                    <div>
+                        <label>Téléacteur *</label>
+                        <select id="o_teleacteur" required>${buildAgentOptionsHtml()}</select>
+                    </div>
+                    <div>
+                        <label>Manager (superviseur) *</label>
+                        <input type="text" id="o_manager" value="${escapeHtml(supervisorName)}" readonly>
+                    </div>
+                    <div><label>Campagne *</label><select id="o_campagne" required>${optionsHtml}</select></div>
+                    <div><label>Date</label><input type="date" id="o_date" value="${today}" readonly></div>
+                    <div><label>Jours travaillés</label><input id="o_jours" placeholder="ex:5"></div>
+                    <div><label>CU Volume *</label><input type="number" id="o_cuVolume" placeholder="Nb CU" required></div>
+                </div>
+                <div id="prpFields" style="display:none;"><div class="grid-2cols"><div><label>Promesses</label><input type="number" id="o_promesses" placeholder="Nb promesses"></div>
+                <div><label>DEL</label><input type="number" id="o_delCount" placeholder="Nb DEL"></div></div></div>
+                <div id="ppaFields" style="display:none;"><div><label>PEL</label><input type="number" id="o_pelCount" placeholder="Nb PEL"></div></div>
+                <div><label>Analyse flash</label><textarea id="o_flash" rows="2"></textarea></div>
+                <div><label>✅ Points forts (max 3) *</label><div id="strengthsContainer"></div><button type="button" id="addStrengthBtn" class="secondary" style="margin-top:4px;">+ Ajouter</button></div>
+                <div><label>⚠️ Axes d'amélioration (max 3) *</label><div id="axesContainer"></div><button type="button" id="addAxisBtn" class="secondary" style="margin-top:4px;">+ Ajouter</button></div>
+                <hr>
+                <div><label>📊 Suivi des objectifs fixés lors du précédent One-to-One</label><div id="suiviObjectifsContainer">${buildSuiviObjectifsHtml('', today)}</div></div>
+                <hr>
+                <div><label>🎯 Objectifs de travail à fixer pour S+1 (par indicateur)</label>${buildObjectifsTravailWidgetHtml('objTravailList')}</div>
+                <button type="button" id="saveOne2OneBtn" style="margin-top:10px; background:#e8692c;"><i class="fas fa-save"></i> Enregistrer</button>
+                <button type="button" id="resetOne2OneBtn" class="secondary" style="margin-top:10px;">⟳ Réinitialiser</button>
+            </form>
+        </div>`;
+        document.body.appendChild(popup);
+
+        document.getElementById('closePopupBtn').onclick = function() { popup.remove(); popupOpen = false; };
+        popup.addEventListener('click', function(e) { if (e.target === popup) { popup.remove(); popupOpen = false; } });
+
+        const teleacteurInput = document.getElementById('o_teleacteur');
+        const refreshSuivi = function() {
+            document.getElementById('suiviObjectifsContainer').innerHTML = buildSuiviObjectifsHtml(teleacteurInput.value, today);
+            attachSuiviLiveListeners(popup);
+        };
+        teleacteurInput.addEventListener('change', refreshSuivi);
+        attachSuiviLiveListeners(popup);
+        const getObjTravailRows = attachObjectifsTravailWidget('objTravailList');
+
+        const campagneSelect = document.getElementById('o_campagne');
+        const prpDiv = document.getElementById('prpFields');
+        const ppaDiv = document.getElementById('ppaFields');
+        const updateFields = function() {
+            const type = campagneSelect.options[campagneSelect.selectedIndex]?.getAttribute('data-type');
+            if (type === 'PPA') { prpDiv.style.display = 'none'; ppaDiv.style.display = 'block'; }
+            else { prpDiv.style.display = 'block'; ppaDiv.style.display = 'none'; }
+        };
+        campagneSelect.onchange = updateFields;
+        updateFields();
+
+        attachPopupDynamicSelectors();
+
+        document.getElementById('saveOne2OneBtn').onclick = function() {
+            saveOne2OnePopupData(getObjTravailRows());
+        };
+        document.getElementById('resetOne2OneBtn').onclick = function() {
+            document.getElementById('one2oneForm').reset();
+            document.getElementById('o_date').value = new Date().toISOString().slice(0,10);
+            document.getElementById('o_manager').value = escapeHtml(supervisorName);
+        };
+    }
+
+    function attachSuiviLiveListeners(popup) {
+        const form = popup.querySelector('#one2oneForm');
+        ['o_cuVolume','o_promesses','o_delCount','o_pelCount'].forEach(id => {
+            const el = form.querySelector('#'+id);
+            if (el) el.addEventListener('input', () => refreshSuiviObjectifs(form));
+        });
+        form.querySelectorAll('.suivi-manual-realisation').forEach(inp => inp.addEventListener('input', () => refreshSuiviObjectifs(form)));
+        refreshSuiviObjectifs(form);
+    }
+
+    function attachPopupDynamicSelectors() {
+        let strengths = [], axes = [];
+        const strengthsDiv = document.getElementById('strengthsContainer');
+        const axesDiv = document.getElementById('axesContainer');
+        const update = function() {
+            let strengthsHtml = '';
+            for (let idx=0; idx<strengths.length; idx++) {
+                let val = strengths[idx];
+                let options = '';
+                for (let i=0; i<COMPETENCE_ITEMS.length; i++) options += `<option ${COMPETENCE_ITEMS[i]===val ? 'selected' : ''}>${COMPETENCE_ITEMS[i]}</option>`;
+                strengthsHtml += `<div class="dynamic-list-item"><select class="strength-select" data-idx="${idx}" style="flex:1">${options}</select><button type="button" class="removeStrength" data-idx="${idx}" style="background:#e8692c; padding:4px 8px; color:white; border-radius:20px;">✖</button></div>`;
+            }
+            strengthsDiv.innerHTML = strengthsHtml;
+            let axesHtml = '';
+            for (let idx=0; idx<axes.length; idx++) {
+                let val = axes[idx];
+                let options = '';
+                for (let i=0; i<COMPETENCE_ITEMS.length; i++) options += `<option ${COMPETENCE_ITEMS[i]===val ? 'selected' : ''}>${COMPETENCE_ITEMS[i]}</option>`;
+                axesHtml += `<div class="dynamic-list-item"><select class="axis-select" data-idx="${idx}" style="flex:1">${options}</select><button type="button" class="removeAxis" data-idx="${idx}" style="background:#e8692c; padding:4px 8px; color:white; border-radius:20px;">✖</button></div>`;
+            }
+            axesDiv.innerHTML = axesHtml;
+            document.querySelectorAll('.removeStrength').forEach(btn => btn.onclick = function() { let idx = parseInt(this.getAttribute('data-idx')); strengths.splice(idx,1); update(); });
+            document.querySelectorAll('.removeAxis').forEach(btn => btn.onclick = function() { let idx = parseInt(this.getAttribute('data-idx')); axes.splice(idx,1); update(); });
+            document.querySelectorAll('.strength-select').forEach(sel => sel.onchange = function() { let idx = parseInt(this.getAttribute('data-idx')); strengths[idx] = this.value; });
+            document.querySelectorAll('.axis-select').forEach(sel => sel.onchange = function() { let idx = parseInt(this.getAttribute('data-idx')); axes[idx] = this.value; });
+        };
+        document.getElementById('addStrengthBtn').onclick = function() { if (strengths.length < 3) { strengths.push(COMPETENCE_ITEMS[0]); update(); } else alert("Max 3 points forts"); };
+        document.getElementById('addAxisBtn').onclick = function() { if (axes.length < 3) { axes.push(COMPETENCE_ITEMS[1]); update(); } else alert("Max 3 axes"); };
+        update();
+    }
+
+    function saveOne2OnePopupData(objTravailRows) {
+        const teleacteurId = document.getElementById('o_teleacteur').value;
+        const manager = document.getElementById('o_manager').value;
+        const campagneSelect = document.getElementById('o_campagne');
+        const campagneId = campagneSelect.value;
+        const cuVolume = document.getElementById('o_cuVolume').value;
+        if (!teleacteurId || !manager || !campagneId || !cuVolume) return alert("Champs obligatoires manquants.");
+        const teleacteur = getAgentName(teleacteurId);
+        const campType = campagneSelect.options[campagneSelect.selectedIndex].getAttribute('data-type');
+        let promessesCount=0, delCount=0, pelCount=0;
+        if (campType === 'PPA') pelCount = parseInt(document.getElementById('o_pelCount').value || 0);
+        else { promessesCount = parseInt(document.getElementById('o_promesses').value || 0); delCount = parseInt(document.getElementById('o_delCount').value || 0); }
+        const strengthSelects = document.querySelectorAll('.strength-select');
+        const axisSelects = document.querySelectorAll('.axis-select');
+        let pointsForts = [], axesAmelioration = [];
+        for (let i=0; i<strengthSelects.length; i++) pointsForts.push(strengthSelects[i].value);
+        for (let i=0; i<axisSelects.length; i++) axesAmelioration.push(axisSelects[i].value);
+        if (pointsForts.length===0 || axesAmelioration.length===0) return alert("Au moins 1 point fort et 1 axe");
+
+        // Capture du suivi des objectifs fixés lors du précédent one-to-one (pour archivage dans l'historique)
+        let suiviObjectifs = [];
+        document.querySelectorAll('#suiviObjectifsContainer tbody tr').forEach(row => {
+            const name = row.getAttribute('data-name') || row.children[0].textContent;
+            const target = parseFloat(row.getAttribute('data-target'));
+            const type = row.getAttribute('data-type');
+            const statusHtml = row.querySelector('.suivi-status-cell').textContent.trim();
+            suiviObjectifs.push({ name, target, type, statusLabel: statusHtml });
+        });
+
+        const record = {
+            id: Date.now(), teleacteur, teleacteurId, manager, campagneId, date: document.getElementById('o_date').value,
+            cuVolume: parseInt(cuVolume), promessesCount, delCount, pelCount,
+            flash: document.getElementById('o_flash').value,
+            pointsForts, axesAmelioration,
+            objectifsTravail: objTravailRows || [],
+            suiviObjectifs,
+            agentAck: { status: 'pending', date: null, comment: '' }
+        };
+        const all = getOne2One(); all.push(record); saveOne2One(all);
+        const popup = document.querySelector('.popup-modal');
+        if (popup) { popup.remove(); popupOpen = false; }
+        showPopup(`One-to-One enregistré. Points forts: ${pointsForts.join(', ')}`, "✅ Succès");
+        render();
+    }
+
+    // ----- POPUP Grille d'évaluation (inchangé) -----
+    function openEvaluationPopup() {
+        if (popupOpen) return;
+        popupOpen = true;
+        const camps = getUserCampaigns();
+        const today = new Date().toISOString().slice(0,10);
+        const supervisorName = currentUser.fullName;
+
+        let optionsHtml = '';
+        for (let i=0; i<camps.length; i++) optionsHtml += `<option value="${camps[i].id}" data-type="${camps[i].type}">${camps[i].name}</option>`;
+
+        const popup = document.createElement('div');
+        popup.className = 'popup-modal';
+        popup.innerHTML = `<div class="popup-card">
+            <button class="close-popup" id="closePopupBtn">&times;</button>
+            <h2><i class="fas fa-clipboard-list"></i> Grille d'évaluation</h2>
+            <form id="evalForm">
+                <div class="grid-2cols">
+                    <div>
+                        <label>Téléacteur *</label>
+                        <select id="eval_teleacteur" required>${buildAgentOptionsHtml()}</select>
+                    </div>
+                    <div>
+                        <label>Manager (superviseur) *</label>
+                        <input type="text" id="eval_manager" value="${escapeHtml(supervisorName)}" readonly>
+                    </div>
+                    <div><label>Campagne *</label><select id="eval_campagne">${optionsHtml}</select></div>
+                    <div><label>Date</label><input type="date" id="eval_date" value="${today}" readonly></div>
+                </div>
+                <div id="evalCriteriaContainer"></div>
+                <button type="button" id="saveEvalBtn" style="margin-top:10px; background:#e8692c;"><i class="fas fa-save"></i> Enregistrer évaluation</button>
+                <button type="button" id="resetEvalBtn" class="secondary" style="margin-top:10px;">⟳ Réinitialiser</button>
+            </form>
+        </div>`;
+        document.body.appendChild(popup);
+
+        document.getElementById('closePopupBtn').onclick = function() { popup.remove(); popupOpen = false; };
+        popup.addEventListener('click', function(e) { if (e.target === popup) { popup.remove(); popupOpen = false; } });
+
+        const campagneSelect = document.getElementById('eval_campagne');
+        const containerCriteria = document.getElementById('evalCriteriaContainer');
+        const buildForm = function() {
+            const type = campagneSelect.options[campagneSelect.selectedIndex]?.getAttribute('data-type') || 'PRP';
+            const items = getEvalItemsForPopup(type);
+            let html = '';
+            for (let i=0; i<items.length; i++) {
+                html += `<div class="eval-section-card">
+                    <div class="eval-header"><strong>${items[i].name}</strong></div>
+                    <div class="eval-desc">${items[i].desc}</div>
+                    <div class="eval-select-group">
+                        <label class="result-option"><input type="radio" name="res_${i}" value="OK"> OK</label>
+                        <label class="result-option"><input type="radio" name="res_${i}" value="KO"> KO</label>
+                        <label class="result-option"><input type="radio" name="res_${i}" value="NA"> NA</label>
+                        <input type="text" id="obs_${i}" placeholder="Observation" style="flex:1;">
+                    </div>
+                </div>`;
+            }
+            containerCriteria.innerHTML = html;
+        };
+        campagneSelect.onchange = buildForm;
+        buildForm();
+
+        document.getElementById('saveEvalBtn').onclick = function() {
+            saveEvaluationPopupData();
+        };
+        document.getElementById('resetEvalBtn').onclick = function() {
+            document.getElementById('evalForm').reset();
+            document.getElementById('eval_date').value = new Date().toISOString().slice(0,10);
+            document.getElementById('eval_manager').value = escapeHtml(supervisorName);
+            buildForm();
+        };
+    }
+
+    function saveEvaluationPopupData() {
+        const teleacteurId = document.getElementById('eval_teleacteur').value;
+        const manager = document.getElementById('eval_manager').value;
+        const campagneId = document.getElementById('eval_campagne').value;
+        if (!teleacteurId || !manager || !campagneId) return alert("Téléacteur, manager et campagne requis");
+        const teleacteur = getAgentName(teleacteurId);
+        const items = EVAL_ITEMS;
+        let criteriaResults = [];
+        for (let i=0; i<items.length; i++) {
+            let selected = document.querySelector(`input[name="res_${i}"]:checked`);
+            if (!selected) return alert(`Veuillez évaluer l'item "${items[i].name}"`);
+            let obs = document.getElementById(`obs_${i}`) ? document.getElementById(`obs_${i}`).value : '';
+            criteriaResults.push({ item: items[i].name, result: selected.value, observation: obs });
+        }
+        let okCount = 0, total = 0;
+        for (let i=0; i<criteriaResults.length; i++) {
+            if (criteriaResults[i].result !== 'NA') total++;
+            if (criteriaResults[i].result === 'OK') okCount++;
+        }
+        let score = total ? (okCount/total*100).toFixed(1) : 0;
+        let evalRecord = {
+            id: Date.now(),
+            teleacteur,
+            teleacteurId,
+            manager,
+            campagneId,
+            date: document.getElementById('eval_date').value,
+            criteriaResults,
+            score
+        };
+        let evals = getEvaluations(); evals.push(evalRecord); saveEvaluations(evals);
+        const popup = document.querySelector('.popup-modal');
+        if (popup) { popup.remove(); popupOpen = false; }
+        showPopup(`Évaluation enregistrée | Score: ${score}% (${okCount}/${total} OK)`, "📊 Résumé");
+        render();
+    }
+
+    // ----- HISTORIQUES (inchangés) -----
+    function renderHistoryOne() {
+        const one2one = filterOne2One();
+        const campaigns = getCampaigns();
+        const campaignMap = {};
+        for (let i=0; i<campaigns.length; i++) campaignMap[campaigns[i].id] = campaigns[i].name;
+        let table = '<div class="table-responsive"><table><thead><tr><th>Date</th><th>Téléacteur</th><th>Manager</th><th>Campagne</th><th>CU</th><th>Promesses</th><th>DEL</th><th>PEL</th><th>Points forts</th><th>Axes amélioration</th><th>Flash</th><th>Objectifs S+1 fixés</th><th>Suivi objectifs précédents</th><th>Statut agent</th></tr></thead><tbody>';
+        if (one2one.length === 0) {
+            table += `<tr><td colspan="14" style="text-align:center; padding:20px; color:#8899aa;">Aucun enregistrement trouvé.</td></tr>`;
+        } else {
+            for (let i=0; i<one2one.length; i++) {
+                let r = one2one[i];
+                let objTxt = (r.objectifsTravail||[]).map(o => `${o.name}: ${formatIndicatorValue(o.target, o.type)}`).join(' | ');
+                let suiviTxt = (r.suiviObjectifs||[]).map(o => `${o.name}: ${o.statusLabel}`).join(' | ');
+                table += `<tr><td>${r.date}</td><td>${escapeHtml(r.teleacteur)}</td><td>${escapeHtml(r.manager||'')}</td><td>${escapeHtml(campaignMap[r.campagneId] || r.campagneId)}</td>
+                <td>${r.cuVolume}</td><td>${r.promessesCount||0}</td><td>${r.delCount||0}</td><td>${r.pelCount||0}</td>
+                <td>${(r.pointsForts||[]).join(', ')}</td><td>${(r.axesAmelioration||[]).join(', ')}</td>
+                <td>${escapeHtml(r.flash||'')}</td><td>${escapeHtml(objTxt||'—')}</td><td>${suiviTxt||'—'}</td><td>${agentAckBadge(r.agentAck)}</td></tr>`;
+            }
+        }
+        table += '</tbody></table></div>';
+        document.getElementById('dynamicView').innerHTML = `<div class="card"><h3>📋 Historique One-to-One</h3>${table}</div>`;
+    }
+
+    function agentAckBadge(ack) {
+        if (!ack || ack.status === 'pending') return '<span class="badge" style="background:#fff4e6; color:#b8600a;">⏳ En attente</span>';
+        if (ack.status === 'signed') return `<span class="badge" style="background:#e6f7f0; color:#0d7a5f;">✅ Attesté${ack.date ? ' le '+ack.date : ''}</span>`;
+        if (ack.status === 'rejected') return `<span class="badge" style="background:#fde8e8; color:#b33c1a;">✖ Refusé${ack.comment ? ' : '+escapeHtml(ack.comment) : ''}</span>`;
+        return '—';
+    }
+
+    function renderHistoryEval() {
+        const evals = filterEvaluations();
+        const campaigns = getCampaigns();
+        const campaignMap = {};
+        for (let i=0; i<campaigns.length; i++) campaignMap[campaigns[i].id] = campaigns[i].name;
+        if (evals.length === 0) {
+            document.getElementById('dynamicView').innerHTML = `<div class="card"><h3>📋 Historique des évaluations</h3><p style="text-align:center; padding:20px; color:#8899aa;">Aucune évaluation enregistrée.</p></div>`;
+            return;
+        }
+        const columnOrder = EVAL_ITEMS.map(item => item.name);
+        let table = '<div class="table-responsive"><table><thead><tr><th>Date</th><th>Téléacteur</th><th>Manager</th><th>Campagne</th><th>Score</th>';
+        for (let i=0; i<columnOrder.length; i++) table += `<th>${escapeHtml(columnOrder[i])}</th>`;
+        table += '</tr></thead><tbody>';
+        for (let i=0; i<evals.length; i++) {
+            let e = evals[i];
+            let results = {};
+            for (let j=0; j<e.criteriaResults.length; j++) results[e.criteriaResults[j].item] = e.criteriaResults[j].result;
+            table += `<tr><td>${e.date}</td><td>${escapeHtml(e.teleacteur)}</td><td>${escapeHtml(e.manager||'')}</td><td>${escapeHtml(campaignMap[e.campagneId] || e.campagneId)}</td><td>${e.score}%</td>`;
+            for (let j=0; j<columnOrder.length; j++) {
+                let res = results[columnOrder[j]] || '—';
+                let cls = res === 'OK' ? 'eval-table-ok' : (res === 'KO' ? 'eval-table-ko' : 'eval-table-na');
+                table += `<td class="${cls}">${res}</td>`;
+            }
+            table += '</tr>';
+        }
+        table += '</tbody></table></div>';
+        document.getElementById('dynamicView').innerHTML = `<div class="card"><h3>📋 Historique des évaluations</h3>${table}</div>`;
+    }
+
+    // ----- (anciennes fonctions d'export CSV supprimées : remplacées par exportExcelOne / exportExcelEval / exportExcelAttest / exportExcelCoach) -----
+
+    // ----- GESTION AGENTS : ajouter un agent = créer un compte Agent -----
+    function renderManageAgents() {
+        const agents = getAgents();
+        const users = getUsers();
+        const container = document.getElementById('dynamicView');
+        let agentsHtml = '';
+        for (let i=0; i<agents.length; i++) {
+            const a = agents[i];
+            const linkedUser = users.find(u => u.role === 'agent' && u.agentId === a.id);
+            agentsHtml += `<div class="agent-item">
+                <span>${escapeHtml(a.name)} ${linkedUser ? `<span class="badge">Compte: ${escapeHtml(linkedUser.username)}</span>` : `<span class="badge" style="background:#fde8e8; color:#b33c1a;">Aucun compte lié</span>`}</span>
+                <button class="delete-agent-btn" data-id="${a.id}" style="background:#b33c1a; padding:2px 12px; font-size:11px;">Supprimer</button>
+            </div>`;
+        }
+        container.innerHTML = `<div class="card">
+            <h3><i class="fas fa-users"></i> Gestion des agents / téléacteurs</h3>
+            <p style="color:#666; margin-bottom:12px;">Chaque agent doit être rattaché à un compte utilisateur (rôle Agent) qui lui permet de consulter ses fiches et de les attester électroniquement. Ajouter un agent ici crée directement son compte de connexion. En cas d'homonymie, utilisez plutôt "Gestion utilisateurs" pour lier précisément un compte à l'un des agents.</p>
+            <div class="grid-2cols" style="margin-bottom:10px;">
+                <div><label>Nom et prénom de l'agent</label><input type="text" id="newAgentName" placeholder="Nom et prénom"></div>
+                <div><label>Identifiant de connexion</label><input type="text" id="newAgentUsername" placeholder="Login"></div>
+                <div><label>Mot de passe (auto si vide)</label><input type="text" id="newAgentPassword" placeholder="Mot de passe"></div>
+            </div>
+            <button id="addAgentBtn">+ Ajouter l'agent (créer son compte)</button>
+            <hr>
+            <div id="agentsList">${agentsHtml || '<p style="color:#999;">Aucun agent enregistré.</p>'}</div>
+        </div>`;
+
+        document.getElementById('addAgentBtn').onclick = function() {
+            const name = document.getElementById('newAgentName').value.trim();
+            const username = document.getElementById('newAgentUsername').value.trim() || name.replace(/\s+/g,'').slice(0,12);
+            const pwd = document.getElementById('newAgentPassword').value.trim();
+            if (!name) return alert("Veuillez saisir un nom");
+            const res = createAgentAccount(name, username, pwd);
+            if (!res.ok) return alert(res.msg);
+            alert(`Agent ajouté et compte créé : ${res.username} (mdp: ${res.password})`);
+            renderManageAgents();
+        };
+
+        document.querySelectorAll('.delete-agent-btn').forEach(btn => {
+            btn.onclick = function() {
+                const id = this.getAttribute('data-id');
+                const agent = getAgents().find(a => a.id === id);
+                if (confirm(`Supprimer cet agent (et son compte de connexion s'il existe) ?`)) {
+                    saveAgents(getAgents().filter(a => a.id !== id));
+                    saveUsers(getUsers().filter(u => !(u.role === 'agent' && u.agentId === id)));
+                    renderManageAgents();
+                }
+            };
+        });
+    }
+
+    // ----- BILAN / ANALYTICS (scope selon le rôle) -----
+    function renderBilan() {
+        const isAd = isAdmin(), isMgr = isManager(), isAg = isAgent();
+        let one2one, evals, attestations, coachings, scopeLabel;
+        if (isAd) { one2one = getOne2One(); evals = getEvaluations(); attestations = getAttestations(); coachings = getCoachings(); scopeLabel = "Toute l'activité (tous les managers et agents)"; }
+        else if (isMgr) { one2one = filterOne2One(); evals = filterEvaluations(); attestations = filterAttestations(); coachings = filterCoachings(); scopeLabel = "Vos agents et vos activités"; }
+        else { one2one = filterOne2One(); evals = filterEvaluations(); attestations = filterAttestations(); coachings = filterCoachings(); scopeLabel = "Votre activité personnelle"; }
+
+        const distinctAgents = new Set();
+        one2one.forEach(r => distinctAgents.add(r.teleacteurId || r.teleacteur));
+        evals.forEach(r => distinctAgents.add(r.teleacteurId || r.teleacteur));
+        attestations.forEach(r => distinctAgents.add(r.agentId || r.agent));
+        coachings.forEach(r => distinctAgents.add(r.agentId || r.agent));
+
+        const avgScore = evals.length ? (evals.reduce((s,e) => s + parseFloat(e.score), 0) / evals.length).toFixed(1) : '—';
+
+        function ackCounts(arr) {
+            let c = { signed: 0, pending: 0, rejected: 0 };
+            arr.forEach(r => { const st = (r.agentAck && r.agentAck.status) || 'pending'; c[st] = (c[st]||0) + 1; });
+            return c;
+        }
+        const ackOne = ackCounts(one2one), ackCoach = ackCounts(coachings), ackAttest = ackCounts(attestations);
+
+        // Fréquence des axes d'amélioration et points forts
+        const axesFreq = {}, fortsFreq = {};
+        one2one.forEach(r => {
+            (r.axesAmelioration||[]).forEach(a => axesFreq[a] = (axesFreq[a]||0)+1);
+            (r.pointsForts||[]).forEach(a => fortsFreq[a] = (fortsFreq[a]||0)+1);
+        });
+
+        // Répartition OK/KO/NA par item de la grille d'évaluation
+        const itemStats = {};
+        EVAL_ITEMS.forEach(it => itemStats[it.name] = { OK:0, KO:0, NA:0 });
+        evals.forEach(e => (e.criteriaResults||[]).forEach(cr => { if (itemStats[cr.item]) itemStats[cr.item][cr.result]++; }));
+
+        // Récidives : un même axe d'amélioration revenant ≥2 fois pour un même agent (identifié par son ID pour éviter les confusions d'homonymes)
+        const recidiveMap = {};
+        one2one.forEach(r => {
+            const agentKey = r.teleacteurId || r.teleacteur;
+            (r.axesAmelioration||[]).forEach(axe => {
+                const key = agentKey + '|' + axe;
+                if (!recidiveMap[key]) recidiveMap[key] = { agent: r.teleacteur, axe, count: 0, lastDate: r.date };
+                recidiveMap[key].count++;
+                if (r.date > recidiveMap[key].lastDate) recidiveMap[key].lastDate = r.date;
+            });
+        });
+        const recidives = Object.values(recidiveMap).filter(r => r.count >= 2).sort((a,b) => b.count - a.count);
+
+        // Évolution du score qualité moyen dans le temps (par date)
+        const scoreByDate = {};
+        evals.forEach(e => { if (!scoreByDate[e.date]) scoreByDate[e.date] = []; scoreByDate[e.date].push(parseFloat(e.score)); });
+        const sortedDates = Object.keys(scoreByDate).sort();
+        const avgScoreSeries = sortedDates.map(d => +(scoreByDate[d].reduce((s,v)=>s+v,0) / scoreByDate[d].length).toFixed(1));
+
+        const container = document.getElementById('dynamicView');
+        let recidiveRows = recidives.slice(0, 15).map(r => `<tr><td>${escapeHtml(r.agent)}</td><td>${escapeHtml(r.axe)}</td><td>${r.count}</td><td>${r.lastDate}</td></tr>`).join('');
+
+        // ----- Données spécifiques au rôle : vue plus poussée pour Admin > Manager > Agent -----
+        let managerScoreNames = [], managerScoreValues = [];
+        let agentScoreNames = [], agentScoreValues = [];
+        let scatterPoints = [];
+        if (isAd) {
+            const byManager = {};
+            evals.forEach(e => { if (!byManager[e.manager]) byManager[e.manager] = []; byManager[e.manager].push(parseFloat(e.score)); });
+            managerScoreNames = Object.keys(byManager);
+            managerScoreValues = managerScoreNames.map(m => +(byManager[m].reduce((s,v)=>s+v,0)/byManager[m].length).toFixed(1));
+            scatterPoints = one2one.map(r => ({ x: r.cuVolume||0, y: (r.axesAmelioration||[]).length }));
+        } else if (isMgr) {
+            const byAgent = {};
+            evals.forEach(e => { const key = e.teleacteur; if (!byAgent[key]) byAgent[key] = []; byAgent[key].push(parseFloat(e.score)); });
+            agentScoreNames = Object.keys(byAgent);
+            agentScoreValues = agentScoreNames.map(a => +(byAgent[a].reduce((s,v)=>s+v,0)/byAgent[a].length).toFixed(1));
+        }
+
+        container.innerHTML = `<div class="card">
+            <h3><i class="fas fa-chart-line"></i> Bilan & Suivi</h3>
+            <p style="color:#8899aa; font-size:12px;">${scopeLabel}</p>
+            <div class="dash-stats">
+                <div class="stat-item"><div class="stat-number">${one2one.length}</div><div class="stat-label">One-to-One</div></div>
+                <div class="stat-item"><div class="stat-number">${avgScore}${avgScore!=='—'?'%':''}</div><div class="stat-label">Score qualité moyen</div></div>
+                <div class="stat-item"><div class="stat-number">${attestations.length}</div><div class="stat-label">Attestations</div></div>
+                <div class="stat-item"><div class="stat-number">${coachings.length}</div><div class="stat-label">Coachings</div></div>
+                ${(isAd||isMgr) ? `<div class="stat-item"><div class="stat-number">${distinctAgents.size}</div><div class="stat-label">Agents suivis</div></div>` : ''}
+            </div>
+
+            <hr><h4>✍️ Suivi des attestations / signatures électroniques</h4>
+            <div class="table-responsive"><table><thead><tr><th>Type</th><th>✅ Signées</th><th>⏳ En attente</th><th>✖ Refusées</th></tr></thead><tbody>
+                <tr><td>One-to-One</td><td>${ackOne.signed}</td><td>${ackOne.pending}</td><td>${ackOne.rejected}</td></tr>
+                <tr><td>Coaching</td><td>${ackCoach.signed}</td><td>${ackCoach.pending}</td><td>${ackCoach.rejected}</td></tr>
+                <tr><td>Attestation débrief</td><td>${ackAttest.signed}</td><td>${ackAttest.pending}</td><td>${ackAttest.rejected}</td></tr>
+            </tbody></table></div>
+
+            <hr><h4>📈 Évolution du score qualité moyen</h4>
+            <div class="chart-box"><canvas id="bilanScoreChart"></canvas></div>
+
+            <div class="bilan-chart-grid" style="margin-top:16px;">
+                <div><h4>🧩 Répartition OK / KO par item de la grille</h4><div class="chart-box"><canvas id="bilanItemsChart"></canvas></div></div>
+                <div><h4>⚠️ Fréquence des axes d'amélioration</h4><div class="chart-box"><canvas id="bilanAxesChart"></canvas></div></div>
+            </div>
+            <div class="chart-box" style="margin-top:16px;"><h4>✅ Fréquence des points forts</h4><canvas id="bilanFortsChart"></canvas></div>
+
+            ${isAd ? `<hr><h4>👥 Score qualité moyen par manager</h4><div class="chart-box"><canvas id="bilanManagerChart"></canvas></div>
+            <h4 style="margin-top:16px;">🔵 Nuage de points — Volume CU vs Nombre d'axes d'amélioration (par one-to-one, tous managers)</h4>
+            <div class="chart-box"><canvas id="bilanScatterChart"></canvas></div>` : ''}
+
+            ${isMgr ? `<hr><h4>👤 Score qualité moyen par agent</h4><div class="chart-box"><canvas id="bilanAgentChart"></canvas></div>` : ''}
+
+            <hr><h4>🔁 Récidives (axe d'amélioration revenant sur plusieurs débriefs pour un même agent)</h4>
+            <div class="table-responsive"><table><thead><tr><th>${isAg?'':'Agent'}</th><th>Axe d'amélioration</th><th>Occurrences</th><th>Dernière observation</th></tr></thead><tbody>
+                ${recidiveRows || '<tr><td colspan="4" style="text-align:center; color:#8899aa; padding:14px;">Aucune récidive détectée pour le moment.</td></tr>'}
+            </tbody></table></div>
+        </div>`;
+
+        try {
+            if (charts.bilanScore) charts.bilanScore.destroy();
+            charts.bilanScore = new Chart(document.getElementById('bilanScoreChart').getContext('2d'), {
+                type: 'line',
+                data: { labels: sortedDates, datasets: [{ label: 'Score qualité moyen (%)', data: avgScoreSeries, borderColor: '#e8692c', backgroundColor: 'rgba(232,105,44,0.15)', fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+
+            if (charts.bilanItems) charts.bilanItems.destroy();
+            const itemNames = Object.keys(itemStats);
+            charts.bilanItems = new Chart(document.getElementById('bilanItemsChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: itemNames, datasets: [
+                    { label: 'OK', data: itemNames.map(n => itemStats[n].OK), backgroundColor: '#0d7a5f' },
+                    { label: 'KO', data: itemNames.map(n => itemStats[n].KO), backgroundColor: '#e8692c' }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { stacked: true }, y: { stacked: true } } }
+            });
+
+            if (charts.bilanAxes) charts.bilanAxes.destroy();
+            const axesNames = Object.keys(axesFreq).sort((a,b) => axesFreq[b]-axesFreq[a]).slice(0,10);
+            charts.bilanAxes = new Chart(document.getElementById('bilanAxesChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: axesNames, datasets: [{ label: 'Occurrences', data: axesNames.map(n => axesFreq[n]), backgroundColor: '#e8692c' }] },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+            });
+
+            if (charts.bilanForts) charts.bilanForts.destroy();
+            const fortsNames = Object.keys(fortsFreq).sort((a,b) => fortsFreq[b]-fortsFreq[a]).slice(0,10);
+            charts.bilanForts = new Chart(document.getElementById('bilanFortsChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: fortsNames, datasets: [{ label: 'Occurrences', data: fortsNames.map(n => fortsFreq[n]), backgroundColor: '#0d7a5f' }] },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+            });
+
+            if (isAd) {
+                if (charts.bilanManager) charts.bilanManager.destroy();
+                charts.bilanManager = new Chart(document.getElementById('bilanManagerChart').getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: managerScoreNames, datasets: [{ label: 'Score moyen (%)', data: managerScoreValues, backgroundColor: '#1e4663' }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+                });
+                if (charts.bilanScatter) charts.bilanScatter.destroy();
+                charts.bilanScatter = new Chart(document.getElementById('bilanScatterChart').getContext('2d'), {
+                    type: 'scatter',
+                    data: { datasets: [{ label: 'One-to-One', data: scatterPoints, backgroundColor: '#e8692c' }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'Volume CU' } }, y: { title: { display: true, text: "Nombre d'axes d'amélioration" }, beginAtZero: true, ticks: { stepSize: 1 } } } }
+                });
+            }
+            if (isMgr) {
+                if (charts.bilanAgent) charts.bilanAgent.destroy();
+                charts.bilanAgent = new Chart(document.getElementById('bilanAgentChart').getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: agentScoreNames, datasets: [{ label: 'Score moyen (%)', data: agentScoreValues, backgroundColor: '#1e4663' }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+                });
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    // ----- FONCTIONS UTILITAIRES -----
+    function showPopup(msg, title) {
+        const div = document.createElement('div'); div.className = 'popup-modal';
+        div.innerHTML = `<div class="popup-card" style="max-width:400px;"><h3>${title}</h3><p>${msg}</p><button class="closePopup" style="background:#e8692c;">OK</button></div>`;
+        document.body.appendChild(div);
+        div.querySelector('.closePopup').onclick = function() { div.remove(); };
+        div.addEventListener('click', function(e) { if (e.target === div) div.remove(); });
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
+    else render();
+})();
+</script>
+</body>
+</html>
